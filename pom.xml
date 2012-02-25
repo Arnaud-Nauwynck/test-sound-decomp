@@ -27,6 +27,16 @@
 	  <version>2.4</version>
   	</dependency>
 
+	<dependency>
+  		<groupId>org.jfree</groupId>
+		<artifactId>jfreechart</artifactId>
+		<version>1.2.0-ea1</version>
+<!--  
+  		<groupId>jfree</groupId>
+  		<version>1.0.14</version>
+-->  		
+	</dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

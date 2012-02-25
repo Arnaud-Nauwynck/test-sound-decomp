@@ -1,5 +1,8 @@
 package fr.an.tests.sound.testfft;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+
 import ca.uol.aig.fftpack.RealDoubleFFT;
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
@@ -21,7 +24,7 @@ public class FFTTestMain
         
         double[] data = new double[inputLen];
 
-        FFTCoefPrinter coefPrinter = new FFTCoefPrinter(inputLen);
+        FFTCoefAnalysis coefPrinter = new FFTCoefAnalysis(inputLen);
         double Period = 2*Math.PI;
         double inv_Period = 1.0 / Period; 
 
@@ -62,6 +65,22 @@ public class FFTTestMain
         
         coefPrinter.setDataJTransform(data);
         coefPrinter.printData();
+        
+        // extract main coeficient ...
+        FFTCoefEntry[] sortedCoefEntries = coefPrinter.getSortedCoefEntries();
+        FFTCoefEntry mainCoef = sortedCoefEntries[0];
+        
+        double mainCoefNorm = mainCoef.norm;
+        double mainCoefPhi = mainCoef.phi;
+        
+        // => compute with least-square ... regression coef for amplitude over time, then frequency
+        // let  t_n = n/N*T,  0 <= n < N
+        //      f_tn = f(t_n)    
+        // 
+        
+        // => compute residual:
+        
+        
     }
     
 }

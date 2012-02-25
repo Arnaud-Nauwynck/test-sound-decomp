@@ -1,0 +1,218 @@
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.2.22)  24 FEB 2012 00:13
+entering extended mode
+ Source specials enabled.
+ %&-line parsing enabled.
+**test-fft.tex
+(./test-fft.tex
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, french, basque, ibycus, monogreek, greek, ancientgreek, loaded.
+(/usr/share/texmf-texlive/tex/latex/base/article.cls
+Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+(/usr/share/texmf-texlive/tex/latex/base/size10.clo
+File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf-texlive/tex/latex/base/fontenc.sty
+Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
+
+(/usr/share/texmf-texlive/tex/latex/base/t1enc.def
+File: t1enc.def 2005/09/27 v1.99g Standard LaTeX file
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
+))
+(/usr/share/texmf-texlive/tex/latex/base/inputenc.sty
+Package: inputenc 2008/03/30 v1.1d Input encoding file
+\inpenc@prehook=\toks14
+\inpenc@posthook=\toks15
+
+(/usr/share/texmf-texlive/tex/latex/base/latin9.def
+File: latin9.def 2008/03/30 v1.1d Input encoding file
+))
+(/usr/share/texmf-texlive/tex/generic/babel/babel.sty
+Package: babel 2008/07/06 v3.8l The Babel package
+
+(/usr/share/texmf-texlive/tex/generic/babel/english.ldf
+Language: english 2005/03/30 v3.3o English support from the babel system
+
+(/usr/share/texmf-texlive/tex/generic/babel/babel.def
+File: babel.def 2008/07/06 v3.8l Babel common definitions
+\babel@savecnt=\count87
+\U@D=\dimen103
+)
+\l@british = a dialect from \language\l@english 
+\l@UKenglish = a dialect from \language\l@english 
+\l@canadian = a dialect from \language\l@american 
+\l@australian = a dialect from \language\l@british 
+\l@newzealand = a dialect from \language\l@british 
+))
+(/usr/share/texmf-texlive/tex/latex/IEEEtran/IEEEtrantools.sty
+Package: IEEEtrantools 2007/01/11 V1.2 by Michael Shell
+
+-- See the "IEEEtrantools_doc.txt" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/tools/
+\@IEEEtrantmpdimenA=\dimen104
+\@IEEEtrantmpdimenB=\dimen105
+\@IEEEtrantmpcountA=\count88
+\@IEEEtrantmpcountB=\count89
+\@IEEEtrantmptoksA=\toks16
+\IEEEnormaljot=\dimen106
+\IEEEilabelindentA=\dimen107
+\IEEEilabelindentB=\dimen108
+\IEEEilabelindent=\dimen109
+\IEEEelabelindent=\dimen110
+\IEEEdlabelindent=\dimen111
+\IEEElabelindent=\dimen112
+\IEEEiednormlabelsep=\dimen113
+\IEEEiedmathlabelsep=\dimen114
+\IEEEiedtopsep=\skip43
+\c@IEEEsubequation=\count90
+\@IEEEeqnnumcols=\count91
+\@IEEEeqncolcnt=\count92
+\IEEEPARstartletwidth=\dimen115
+) (./test-fft.aux)
+\openout1 = `test-fft.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 7.
+LaTeX Font Info:    ... okay on input line 7.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 7.
+LaTeX Font Info:    ... okay on input line 7.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 7.
+LaTeX Font Info:    ... okay on input line 7.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 7.
+LaTeX Font Info:    ... okay on input line 7.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 7.
+LaTeX Font Info:    ... okay on input line 7.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 7.
+LaTeX Font Info:    ... okay on input line 7.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 11.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 11.
+
+Overfull \hbox (11.41484pt too wide) in paragraph at lines 11--14
+\T1/cmr/m/n/10 cretized in time by sam-pling at reg-u-lar fre-quency (ex-am-ple
+ 8000 Hz): $\OML/cmm/m/it/10 t[]; t[]; t[] [] t[]$
+ []
+
+Missing character: There is no Â in font cmr10!
+Missing character: There is no Â in font cmr10!
+
+Overfull \hbox (40.42358pt too wide) in paragraph at lines 73--79
+[][]\T1/cmr/m/n/10 The er-ror be-tween real and pre-dicted value is $[]\OML/cmm
+/m/it/10 X[]\OT1/cmr/m/n/10 ) \OMS/cmsy/m/n/10 ^^@ \OML/cmm/m/it/10 X[] \OT1/cm
+r/m/n/10 = []$ 
+ []
+
+[1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+Overfull \hbox (9.10725pt too wide) in alignment at lines 82--92
+ [] [] [] [][]
+ []
+
+Missing character: There is no Â in font cmr10!
+
+Overfull \hbox (12.43462pt too wide) in paragraph at lines 126--128
+[]\T1/cmr/m/n/10 The sig-nal is de-com-posed in $\OML/cmm/m/it/10 K$ \T1/cmr/m/
+n/10 main har-mon-ics, with a residu: $\OML/cmm/m/it/10 S\OT1/cmr/m/n/10 (\OML/
+cmm/m/it/10 t[]\OT1/cmr/m/n/10 ) = [][] \OML/cmm/m/it/10 S[]\OT1/cmr/m/n/10 (\O
+ML/cmm/m/it/10 t[]\OT1/cmr/m/n/10 ) +
+ []
+
+[2]
+Overfull \hbox (3.60806pt too wide) in alignment at lines 135--143
+ [] [] [] [][]
+ []
+
+
+Overfull \hbox (111.61916pt too wide) detected at line 171
+\OMS/cmsy/m/n/10 jj\OML/cmm/m/it/10 R\OMS/cmsy/m/n/10 jj[] \OT1/cmr/m/n/10 = []
+ \OMS/cmsy/m/n/10 ^^@\OT1/cmr/m/n/10 2 [] \OML/cmm/m/it/10 c[] [] \OT1/cmr/m/n/
+10 + [] \OML/cmm/m/it/10 c[]c[] []
+ []
+
+
+Overfull \hbox (12.43462pt too wide) in paragraph at lines 187--189
+[]\T1/cmr/m/n/10 The sig-nal is de-com-posed in $\OML/cmm/m/it/10 K$ \T1/cmr/m/
+n/10 main har-mon-ics, with a residu: $\OML/cmm/m/it/10 S\OT1/cmr/m/n/10 (\OML/
+cmm/m/it/10 t[]\OT1/cmr/m/n/10 ) = [][] \OML/cmm/m/it/10 S[]\OT1/cmr/m/n/10 (\O
+ML/cmm/m/it/10 t[]\OT1/cmr/m/n/10 ) +
+ []
+
+[3]
+! Extra \right.
+l.213 ... \phi_{k_1} -  \phi_{k_2} \right) \right)
+                                                   $
+I'm ignoring a \right that had no matching \left.
+
+! Extra \right.
+l.217 ...0 + c_k^1 (t_n-t_0)) S_n COS_{kn} \right)
+                                                   \nonumber\\
+I'm ignoring a \right that had no matching \left.
+
+
+Overfull \hbox (43.8199pt too wide) in alignment at lines 215--250
+ [] [] [] [][]
+ []
+
+[4]
+Overfull \hbox (12.43462pt too wide) in paragraph at lines 288--290
+[]\T1/cmr/m/n/10 The sig-nal is de-com-posed in $\OML/cmm/m/it/10 K$ \T1/cmr/m/
+n/10 main har-mon-ics, with a residu: $\OML/cmm/m/it/10 S\OT1/cmr/m/n/10 (\OML/
+cmm/m/it/10 t[]\OT1/cmr/m/n/10 ) = [][] \OML/cmm/m/it/10 S[]\OT1/cmr/m/n/10 (\O
+ML/cmm/m/it/10 t[]\OT1/cmr/m/n/10 ) +
+ []
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.291 \noindent The $K$^
+                        {th} harmonic
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+! Missing $ inserted.
+<inserted text> 
+                $
+l.292 $ S_
+          {k}(t) = c_{k} cos(w_{k} t+\phi_{k})$  with $c_k >= 0$, $\phi_k \i...
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.
+
+[5] [6] (./test-fft.aux) ) 
+Here is how much of TeX's memory you used:
+ 1087 strings out of 494955
+ 14460 string characters out of 1179717
+ 71364 words of memory out of 3000000
+ 4335 multiletter control sequences out of 15000+50000
+ 7486 words of font info for 19 fonts, out of 3000000 for 9000
+ 73 hyphenation exceptions out of 8191
+ 25i,14n,18p,201b,166s stack positions out of 5000i,500n,10000p,200000b,50000s
+ </home/arnaud/.texmf-var/fonts/pk/ljfour/jknappen/ec
+/ecbx1200.600pk> </home/arnaud/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1000.
+600pk> </home/arnaud/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1440.600pk></us
+r/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/tex
+mf-texlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-texlive/
+fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texmf-texlive/fonts/type1/
+public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfo
+nts/cm/cmr10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr5.
+pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/sha
+re/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-te
+xlive/fonts/type1/public/amsfonts/cm/cmsy7.pfb>
+Output written on test-fft.pdf (6 pages, 148776 bytes).
+PDF statistics:
+ 180 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+
