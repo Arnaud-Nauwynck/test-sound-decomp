@@ -2,7 +2,10 @@ package fr.an.tests.sound.testfft;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -15,7 +18,6 @@ import javax.swing.event.ChangeListener;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.ChartChangeEvent;
 import org.jfree.chart.event.ChartChangeListener;
@@ -73,7 +75,9 @@ public class SoundAnalysisView {
         	this.mainDataset = new DefaultXYDataset();
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "raw", xData, model.getAudioDataAsDouble());
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "approx", xData, approxData);
-			
+
+			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "residu", xData, residualData);
+
 
 //	        mainDataset.addChangeListener(new DatasetChangeListener() {
 //				public void datasetChanged(DatasetChangeEvent event) {
@@ -98,12 +102,35 @@ public class SoundAnalysisView {
         	//tabbedPane.add("reconst-params", reconstPanel);
         	reconstResiduPanel.add(reconstPanel, BorderLayout.NORTH);
         	
-//        	this.mainHarmonicCountSpinner = new JSpinner(new SpinnerNumberModel(5, 0, 100, 1));
-//        	mainHarmonicCountSpinner.getModel().addChangeListener(new ChangeListener() {
-//				public void stateChanged(ChangeEvent e) {
-//					updateReconstData();
-//				}
-//			});
+        	
+        	JButton butDomainZoomOut = new JButton("-");
+        	reconstPanel.add(butDomainZoomOut);
+        	butDomainZoomOut.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					shiftDomainRange(+0.25, -0.25);
+				}
+			});
+        	JButton butDomainZoomIn = new JButton("+");
+        	reconstPanel.add(butDomainZoomIn);
+        	butDomainZoomIn.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					shiftDomainRange(-0.5, +0.5);
+				}
+			});
+        	JButton butDomainZoomLeft = new JButton("<");
+        	reconstPanel.add(butDomainZoomLeft);
+        	butDomainZoomLeft.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					shiftDomainRange(-1, -1);
+				}
+			});
+        	JButton butDomainZoomRight = new JButton(">");
+        	reconstPanel.add(butDomainZoomRight);
+        	butDomainZoomRight.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					shiftDomainRange(+1, +1);
+				}
+			});
         	
         	this.mainHarmonicCountSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 5);
         	mainHarmonicCountSlider.getModel().addChangeListener(new ChangeListener() {
@@ -132,7 +159,7 @@ public class SoundAnalysisView {
 	        // JPanel panel = new JPanel();
 	        this.residualChartPanel = new ChartPanel(residualChart); 
 	
-			ValueAxis residualRangeAxis = residualChart.getXYPlot().getRangeAxis();
+			ValueAxis residualRangeAxis = residualChart.getXYPlot().getDomainAxis();
 			residualRangeAxis.setAutoRange(false);
 
 	        residuDataset.addChangeListener(new DatasetChangeListener() {
@@ -180,6 +207,19 @@ public class SoundAnalysisView {
 	
 	public JComponent getJComponent() {
 		return tabbedPane;
+	}
+	
+	private void shiftDomainRange(double leftLenIncr, double rightLenIncr) {
+		XYPlot xyPlot = mainChart.getXYPlot();
+		ValueAxis xAxis = xyPlot.getDomainAxis();
+		Range xrange = xAxis.getRange();
+		double lowerBound = xrange.getLowerBound();
+		double upperBound = xrange.getUpperBound();
+		double len = upperBound - lowerBound;
+		double newLowerBound = lowerBound + leftLenIncr * len;
+		double newUpperBound = upperBound + rightLenIncr * len;
+		
+		xAxis.setRange(newLowerBound, newUpperBound);
 	}
 	
 	private void onMainChartChanged(ChartChangeEvent event) {

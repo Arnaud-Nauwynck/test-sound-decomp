@@ -34,6 +34,7 @@ public class FFTCoefAnalysis {
     	
     }
 
+	private final int dataLen;
 	private final int fftLen;
 	
 	double[] fftData;
@@ -47,6 +48,7 @@ public class FFTCoefAnalysis {
 	// ------------------------------------------------------------------------
 	
     public FFTCoefAnalysis(int len) {
+    	this.dataLen = len;
     	this.fftLen = len / 2;
     	this.factorFft = 2.0 / len;
     	coefEntries = new FFTCoefEntry[fftLen];
@@ -124,11 +126,11 @@ public class FFTCoefAnalysis {
         return res;
 	}
 
-	public void getReconstructedMainHarmonics(final int harmonicCount, double[] approxData, FFTResiduInfo residuInfo) {
-		final int len = approxData.length;
+	public void getReconstructedMainHarmonics(final int harmonicCount, 
+			int resultStartIndex, int resultEndIndex, double[] approxData, FFTResiduInfo residuInfo) {
 		double tau = 1.0; //  / len;
-		double ti = 0;
-		for (int i = 0; i < len; i++, ti+=tau) {
+		double ti = resultStartIndex * tau;
+		for (int i = resultStartIndex; i < resultEndIndex; i++, ti+=tau) {
 			double tmpapprox = 0;
 			for (int k = 0; k < harmonicCount; k++) {
 				FFTCoefEntry e = sortedCoefEntries[k];

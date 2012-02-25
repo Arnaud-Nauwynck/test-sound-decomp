@@ -5,6 +5,11 @@ public class FFTResiduInfo {
 	public double cumulSquareNormCoef;
 	public double totalSquareNormCoef;
 
+	public void addFragment(FFTResiduInfo frag) {
+		this.cumulSquareNormCoef += frag.cumulSquareNormCoef;
+		this.totalSquareNormCoef += frag.totalSquareNormCoef;
+	}
+	
 	public String toStringFFTCoef() {
 		String res = "";
 		double ratioPercentNormCoef = (totalSquareNormCoef > 0)? cumulSquareNormCoef / totalSquareNormCoef * 100: 0;
