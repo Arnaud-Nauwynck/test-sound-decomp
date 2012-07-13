@@ -16,18 +16,26 @@ import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
+import fr.an.tests.sound.testfft.sfft.FFTCoefEntry;
+import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis;
+import fr.an.tests.sound.testfft.synth.PHCoefFragmentAnalysis;
 
 public class SoundAnalysisModel {
 
 	private String name;
 	
 	private AudioFormat audioFormat;
+	
 	private int frameLength;
-	private short[] audioDataAsShorts;
+	/** frames per seconds ... ex: 4000 Hz*/
+	private double frameRate;
 	private double[] audioDataAsDouble;
 	
-	private int fragmentLen = 1024;
-	private FFTCoefAnalysis[] fftCoefAnalysisFragments;
+	
+	private int fragmentLen = // 1024;   // at 4000 Hz => sample for 1/4 second = 250 ms
+			2048;  // at 4000 Hz => sample for 1/2 second = 500 ms
+	private FFTCoefFragmentAnalysis[] fftCoefAnalysisFragments;
+	private PHCoefFragmentAnalysis[] phCoefAnalysisFragments;
 	
 	// ------------------------------------------------------------------------
 
@@ -45,7 +53,32 @@ public class SoundAnalysisModel {
 	public int getFrameLength() {
 		return frameLength;
 	}
-	
+
+	public void setFrameLength(int p) {
+		this.frameLength = p;
+	}
+
+	public double getFrameRate() {
+		return frameRate;
+	}
+
+	public void setFrameRate(int p) {
+		this.frameRate = p;
+	}
+
+	public double getFrameDuration() {
+		return frameLength / frameRate;
+	}
+
+
+	public int getFragmentLen() {
+		return fragmentLen;
+	}
+
+	public void setFragmentLen(int p) {
+		this.fragmentLen = p;
+	}
+
 	public double[] getAudioDataAsDouble() {
 		return audioDataAsDouble;
 	}
@@ -64,9 +97,10 @@ public class SoundAnalysisModel {
 		System.out.println("audio format:" + audioFormat);
 		
 		this.frameLength = (int) audioInputStream.getFrameLength();
+		this.frameRate = audioFormat.getFrameRate();
 		int audioBytesLen = frameLength * audioFormat.getFrameSize();
-		float duration = frameLength/audioFormat.getFrameRate();
-		System.out.println("frameLength:" + frameLength + ", duration (frameLength/framePerSec): " + duration + ", bytes (frameLength*FrameSize): " + audioBytesLen); 
+		double durationTime = frameLength/audioFormat.getFrameRate();
+		System.out.println("frameLength:" + frameLength + ", duration (frameLength/framePerSec): " + durationTime + ", bytes (frameLength*FrameSize): " + audioBytesLen); 
 
 		// read bytes from audioInputStream
 		boolean useNioForFileRead = true;
@@ -110,7 +144,7 @@ public class SoundAnalysisModel {
 		
 		// convert to 16_LE 
 		ShortBuffer sbuf = audioBytesBuffer.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
-		audioDataAsShorts = new short[frameLength];
+		short[] audioDataAsShorts = new short[frameLength];
 		sbuf.get(audioDataAsShorts); // read short from bytes
 
 		
@@ -138,51 +172,57 @@ public class SoundAnalysisModel {
 
 			this.frameLength = lastIndexNonNull - firstIndexNonNull;
 			short[] oldData = audioDataAsShorts;
-			this.audioDataAsShorts = new short[frameLength];
+			audioDataAsShorts = new short[frameLength];
 			System.arraycopy(oldData, firstIndexNonNull, audioDataAsShorts, 0, frameLength);
 		}
 		
-		audioDataAsDouble = new double[frameLength];
+		double[] tmpAudioData = new double[frameLength];
 		for (int i = 0; i < frameLength; i++) {
-			audioDataAsDouble[i] = ((double) audioDataAsShorts[i]) / 0x8000;
+			tmpAudioData[i] = ((double) audioDataAsShorts[i]) / 0x8000;
 		}
+		setAudioDataAsDouble(tmpAudioData);
 	}
-
 	
-	public int getFragmentLen() {
-		return fragmentLen;
-	}
-
-	public void setFragmentLen(int p) {
-		this.fragmentLen = p;
+	public void setAudioDataAsDouble(double[] audioDataAsDouble) {
+		this.audioDataAsDouble = audioDataAsDouble;
 	}
 
 	public void analysisFFT() {
 
 		int fragmentsCount = audioDataAsDouble.length / fragmentLen - 1;
-		this.fftCoefAnalysisFragments = new FFTCoefAnalysis[fragmentsCount];
+		this.fftCoefAnalysisFragments = new FFTCoefFragmentAnalysis[fragmentsCount];
+		this.phCoefAnalysisFragments = new PHCoefFragmentAnalysis[fragmentsCount];
+		
+		DoubleFFT_1D fft = new DoubleFFT_1D(fragmentLen);
+
 		
 		int currIndex = 0;
+		double currStartTime = 0.0; 
+		double invFrameRate = 1.0 / frameRate;
 		for (int i = 0; i < fragmentsCount; i++,currIndex += fragmentLen) {
-			fftCoefAnalysisFragments[i] = new FFTCoefAnalysis(fragmentLen);
-		
+			double[] fragmentData = new double[fragmentLen];
+			System.arraycopy(audioDataAsDouble, currIndex, fragmentData, 0, fragmentLen);
+
 			double[] fftData = new double[fragmentLen];
 			System.arraycopy(audioDataAsDouble, currIndex, fftData, 0, fragmentLen);
-			
-			DoubleFFT_1D fft = new DoubleFFT_1D(fragmentLen);
-//			System.out.println("doing FFT on sub-length:" + fftLen + " (=" + (fftLen/audioFormat.getFrameRate()) + " s)");
-			
 			fft.realForward(fftData);
-			
-			fftCoefAnalysisFragments[i].setDataJTransform(fftData);
-			
+			fftCoefAnalysisFragments[i] = new FFTCoefFragmentAnalysis(fragmentLen);
+			fftCoefAnalysisFragments[i].setFFTData(fftData);
 			// fftCoefAnalysis.printData();
-			;
+
+			double currFragmentTime = fragmentData.length * invFrameRate;
+			double currEndTime = currStartTime + currFragmentTime;
+			phCoefAnalysisFragments[i] = new PHCoefFragmentAnalysis(currStartTime, currEndTime);
+			phCoefAnalysisFragments[i].setData(fragmentData);
+			
+			currStartTime += currFragmentTime;
 		}
 	}
 
 	public void playAudioBytes(double[] data) {
-		playAudioBytes(audioFormat, data);
+		if (audioFormat != null) {
+			playAudioBytes(audioFormat, data);
+		}
 	}
 
 	public static byte[] convertToAudioBytesFormat(AudioFormat audioFormat, double[] data) {
@@ -226,17 +266,17 @@ public class SoundAnalysisModel {
 	}
 
 	public void getReconstructedMainHarmonics(int harmonicCount, 
-				double[] approxData, double[] residualData, FFTResiduInfo residuInfo) {
+				double[] approxData, double[] residualData, ResiduInfo residuInfo) {
 		int fragmentsCount = fftCoefAnalysisFragments.length;
 
 		int approxDataLen = approxData.length;
 		
 		int currIndex = 0;
 		for (int i = 0; i < fragmentsCount; i++,currIndex += fragmentLen) {
-			FFTCoefAnalysis fftFrag = fftCoefAnalysisFragments[i];
+			FFTCoefFragmentAnalysis fftFrag = fftCoefAnalysisFragments[i];
 		
 			int endIndex = Math.min(currIndex + fragmentLen, approxDataLen);
-			FFTResiduInfo residuInfoFrag = new FFTResiduInfo();
+			ResiduInfo residuInfoFrag = new ResiduInfo();
 			fftFrag.getReconstructedMainHarmonics(harmonicCount, 
 					currIndex, endIndex, approxData, residuInfoFrag);
 			
@@ -248,5 +288,71 @@ public class SoundAnalysisModel {
 		for (int i = 0; i < len; i++) {
 			residualData[i] = audioDataAsDouble[i] - approxData[i];
 		}
+	}
+
+	public void getReconstructedMainHarmonicsPH(int harmonicCount, 
+			double startTime, double endTime,
+			double[] approxData, double[] residualData, ResiduInfo residuInfo) {
+		int fragmentsCount = fftCoefAnalysisFragments.length;
+	
+		int approxDataLen = approxData.length;
+		
+		int fragIndex = 0;
+		int currIndex = 0;
+		double currStartTime = startTime;
+		for (fragIndex = 0; fragIndex < fragmentsCount; fragIndex++) {
+			PHCoefFragmentAnalysis frag = phCoefAnalysisFragments[fragIndex];
+			if (frag.getStartTime() > startTime) {
+				currStartTime += frag.getDuration(); 
+				continue;
+			}
+		}
+		for (; fragIndex < fragmentsCount; fragIndex++) {
+			PHCoefFragmentAnalysis frag = phCoefAnalysisFragments[fragIndex];
+		
+			double currFragStartTime = frag.getStartTime();
+			double currFragEndTime = frag.getEndTime();
+			if (currStartTime > endTime) {
+				break;
+			}
+			int endIndex = Math.min(currIndex + fragmentLen, approxDataLen);
+			ResiduInfo residuInfoFrag = new ResiduInfo();
+			frag.getReconstructedMainHarmonics(harmonicCount, 
+					currFragStartTime, currFragEndTime,
+					currIndex, endIndex, approxData, residuInfoFrag);
+			
+			residuInfo.addFragment(residuInfoFrag);
+			
+			currIndex += frag.getDataLen();
+			currStartTime += frag.getDuration(); 
+		}
+		
+		final int len = approxData.length;
+		// double
+		for (int i = 0; i < len; i++) {
+			residualData[i] = audioDataAsDouble[i] - approxData[i];
+		}
+	}
+		
+	public double[] getFFTData() {
+		final int fftLen = fragmentLen / 2;
+		double[] res = new double[fftLen];
+		final int fragmentsCount = fftCoefAnalysisFragments.length;
+		for (int f = 0; f < fragmentsCount; f++) {
+			FFTCoefFragmentAnalysis fftFrag = fftCoefAnalysisFragments[f];
+			FFTCoefEntry[] fragFFTCoefs = fftFrag.getCoefEntries();
+			for (int i = 0; i < fftLen; i++) {
+				res[i] += fragFFTCoefs[i].getNorm(); // sum norm is not exact (neither summing fragments)... but ok for display
+			}
+		}
+		double invFragCount = 1.0 / fragmentsCount; 
+		for (int i = 0; i < fftLen; i++) {
+			res[i] *= invFragCount;
+		}
+		return res;
+	}
+
+	public FFTCoefFragmentAnalysis[] getFFTCoefAnalysisFragments() {
+		return fftCoefAnalysisFragments;
 	}
 }

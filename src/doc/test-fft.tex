@@ -9,7 +9,7 @@
 \section{General Principles}
 
 Let $S(t)$ be a 1-dimensional time signal (sound) to be compressed.
-It is discretized in time by sampling at regular frequency (example 8000 Hz): $t_0, t_1, t_2 \ldots t_N$
+It is discretized in time by sampling at regular frequency (example 8000 Hz): $t_0, t_1 \ldots t_N$
 $t_n = t_0 + n * \tau$ ,   $\tau=1/F$ 
 
 Each signal measure $S_n=s(t_{n})$ is converted from analogic to digital, so dicretized and encoded to a fixed
@@ -182,6 +182,8 @@ applying the least-square amplitude fitting.
 
 
 
+
+
 \section{Least Square Method for Harmonics Amplitude Linear Perturbation}
 
 The signal is decomposed in $K$ main harmonics, with a residu:
@@ -210,11 +212,11 @@ term $c_k^1$
 \noindent For ease of calculation, lets note 
 $ COS_{kn} = \cos(w_{k} t_n+\phi_{k}) $ 
 and 
-$ COS\Delta_{k_1 k_2 n} = \cos \left((w_{k_1} - w_{k_2}) t_n + \phi_{k_1} -  \phi_{k_2} \right) \right) $
+$ COS\Delta_{k_1 k_2 n} = \cos \left((w_{k_1} - w_{k_2}) t_n + \phi_{k_1} -  \phi_{k_2} \right) $
 
 \begin{IEEEeqnarray}{rCl}
 ||R||^2 &=& \left( \sum_n S_n^2 \right) \nonumber\\
- & & - 2 \sum_k \sum_n (c_k^0 + c_k^1 (t_n-t_0)) S_n COS_{kn} \right) \nonumber\\
+ & & - 2 \sum_k \sum_n \left( c_k^0 + c_k^1 (t_n-t_0)) S_n COS_{kn} \right) \nonumber\\
  & & + \sum_{k_1,k_2} \left( \sum_n (c_{k_1}^0 + c_{k_1}^1 (t_n-t_0)) (c_{k_2}^0 + c_{k_2}^1 (t_n-t_0)) 
    COS\Delta_{k_1 k_2 n} \right) \nonumber\\
 &=& \sum_n S_n^2  \nonumber\\
@@ -288,11 +290,69 @@ applying the least-square amplitude linear perturbation procedure.
 The signal is decomposed in $K$ main harmonics, with a residu:
 $ S(t_n) = \sum_k S_k(t_n) + R(t)$
 
-\noindent The $K$^{th} harmonic
+\noindent The $K^{th}$ harmonic
 $ S_{k}(t) = c_{k} cos(w_{k} t+\phi_{k})$  with $c_k >= 0$, $\phi_k \in [-\pi,\pi]$
 is replaced by modifying the constant frequency $w_k$, to obtain a ``non-periodic harmonic'':
-$ w_k(t) = w_k^0 + w_k^1 (t-t_0) $ 
+$ w_k(t) = w_k^0 + w_k^1 (t-t_0) $
+(or ease of writing, $t_0 = 0$ \ldots which is a change in $t$ origin). 
 
 \noindent This model is usable only for short-time interval!
+
+\noindent The calculation done in previous section is slightly modified.
+\begin{IEEEeqnarray}{rCl}
+||R||^2 &=& \left( \sum_n S_n^2 \right) \nonumber\\
+ & & - 2 \sum_k \left( \sum_n c_k S_n \cos(w_{k}(t_n) t_n+\phi_{k}) \right) \nonumber\\
+ & & + \sum_{k_1,k_2} \left( \sum_n c_{k_1} c_{k_2} \cos \left((w_{k_1}(t_n) - w_{k_2}(t_n)) t_n +
+ \phi_{k_1} -  \phi_{k_2} \right) \right) \nonumber\\
+\end{IEEEeqnarray}
+
+
+\noindent Developping trigonometric formula $ \cos(a+b) = \cos(a)cos(b) - \sin(a)\sin(b) $, for expanding $ w_k(t)$, we
+get
+
+\begin{IEEEeqnarray}{rCl}
+\cos(w_{k}(t_n) t_n+\phi_{k}) &=& \cos( (w_k^0 + w_k^1 t_n ) t_n +\phi_{k})  \nonumber\\
+ &=&  \cos( (w_k^0 t_n +\phi_{k}) +  w_k^1 t_n ) \nonumber\\
+ &=&  \cos( w_k^0 t_n +\phi_{k}) \cos(w_k^1 t_n) - \sin( w_k^0 t_n +\phi_{k}) \sin(w_k^1 t_n) \nonumber\\
+ & \approx &  \cos( w_k^0 t_n +\phi_{k}) ( 1 - 1/2(w_k^1 t_n)^2) - \sin( w_k^0 t_n +\phi_{k}) (w_k^1 t_n) \nonumber\\
+\end{IEEEeqnarray}{rCl}
+
+
+\section{Partial Derivative of Perturbation Residu}
+
+\noindent given $P$ parameters,
+$$ S_k(t_n) = A_k(t_n,p_1,p_2..p_P) sin(w_k(t_n,p_1,p_2,..p_P) t_n + \phi_{k}(t_n,p_1,p_2,..p_P))$$
+
+$A_k$, $w_k$ and $\phi_{k}$ could have the form $A_k(t,p..) = p_0 + p_1 t + p_2 t^2$. 
+For now we compute in the general case with $p$ derivatives.
+
+\begin{IEEEeqnarray}{rCl}
+E = ||R||^2 &=& \sum_n \left( S_n - \sum_k S_k(t_n, p_1, p_2, \ldots p_P)
+\right)^2 \nonumber\\
+\frac{\partial E}{\partial p_i} &=& 
+	- 2 \sum_n 
+		\left( \sum_k \frac{\partial S_k}{\partial p_i}(t_n, p_1, p_2, \ldots p_P)
+		\right) \left( S_n - \sum_k S_k(t_n, p_1, p_2, \ldots p_P) \right)
+\nonumber\\
+\end{IEEEeqnarray}
+
+
+\begin{IEEEeqnarray}{rCl}
+||R||^2 &=& \sum_n \left( S_n - A_k(t_n,p_.) sin(w_k(t_n,p_.) t_n + \phi_{k}(t_n,p_.)) \right)^2 \nonumber\\
+\frac{\partial ||R(p)||^2}{\partial p_i} &=& 
+  - 2 \sum_n \frac{\partial}{\partial p}\left( 
+  		A_k(t_n,p_.) \sin( w_k(t_n,p_.) t_n + \phi_{k}(t_n,p_.) )
+  	\right)
+  	 . \left( S_n - A_k(t_n,p_.) \sin( w_k(t_n,p_.) t_n + \phi_{k}(t_n,p_.)) \right) 
+  \nonumber \\
+ &=&  -2 \sum_n  (
+ 		\frac{\partial A_k}{\partial p}(t_n,p_.) \sin( w_k t_n + \phi_{k} )
+ 		+ A_k(t_n,p_.)
+ 		 \left( \frac{\partial w_k}{\partial p}(t_n,p_.) t_n + \frac{\partial \phi_{k}}{\partial p}(t_n,p_.) \right)
+ 		 \cos( w_k t_n + \phi_{k} )
+  	     A_k(t_n,p_.) \nonumber\\
+ & &   \qquad )   \left( S_n - A_k \sin( w_k t_n + \phi_{k} ) \right)
+\end{IEEEeqnarray}
+
 
 \end{document}

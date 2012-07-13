@@ -2,6 +2,8 @@ package fr.an.tests.sound.testfft;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -9,15 +11,18 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.ChartChangeEvent;
 import org.jfree.chart.event.ChartChangeListener;
@@ -26,6 +31,8 @@ import org.jfree.data.Range;
 import org.jfree.data.event.DatasetChangeEvent;
 import org.jfree.data.event.DatasetChangeListener;
 import org.jfree.data.xy.DefaultXYDataset;
+
+import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis;
 
 public class SoundAnalysisView {
 
@@ -42,15 +49,26 @@ public class SoundAnalysisView {
 	private DefaultXYDataset residuDataset;
 	private JFreeChart residualChart;
 	private ChartPanel residualChartPanel;
+
+	private double[] fftxData;
+	private double[] fftData;
+	private DefaultXYDataset fftDataset;
+	private JFreeChart fftChart;
+	private ChartPanel fftChartPanel;
+	private JTextPane fftTextPane;
 	
 	private double[] approxData;
 	private double[] residualData;
-	
+
+	private double[] approxDataPH;
+	private double[] residualDataPH;
+
 	
 //	private JSpinner mainHarmonicCountSpinner;
 	private JSlider mainHarmonicCountSlider;
 	private JLabel harmonicCountValueLabel;
 	private JLabel harmonicResiduInfoLabel;
+	private JLabel harmonicResiduInfoPHLabel;
 	
 	// ------------------------------------------------------------------------
 	
@@ -62,35 +80,36 @@ public class SoundAnalysisView {
 
 		JSplitPane vertSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         tabbedPane.add("data", vertSplit);
-        // vertSplit.setDividerSize(100);
-        vertSplit.setDividerLocation(0.5);
         
 		int frameLength = model.getFrameLength();
 		this.xData = JFreeChartUtils.createLinearDoubleRange(frameLength);
 
 		this.approxData = new double[frameLength];
 		this.residualData = new double[frameLength];
-		
+
+		this.approxDataPH = new double[frameLength];
+		this.residualDataPH = new double[frameLength];
+
         { // mainChartPanel + reconstructed
         	this.mainDataset = new DefaultXYDataset();
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "raw", xData, model.getAudioDataAsDouble());
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "approx", xData, approxData);
-
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "residu", xData, residualData);
 
+			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "approxPH", xData, approxDataPH);
+			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "residuPH", xData, residualDataPH);
 
-//	        mainDataset.addChangeListener(new DatasetChangeListener() {
-//				public void datasetChanged(DatasetChangeEvent event) {
-//					onMainChartDatasetChanged(event);
-//				}
-//			});
-	        
 			// JFreeChart
 	        this.mainChart = ChartFactory.createXYLineChart(model.getName(), "time", "amplitude", mainDataset, true);
+	        mainChart.addChangeListener(new ChartChangeListener() {
+				public void chartChanged(ChartChangeEvent event) {
+					onMainChartChanged(event);
+				}
+			});
 	
 	        // JPanel panel = new JPanel();
 	        this.mainChartPanel = new ChartPanel(mainChart); 
-	
+
 	        vertSplit.add(mainChartPanel);
         }
 
@@ -147,11 +166,16 @@ public class SoundAnalysisView {
         	
         	this.harmonicResiduInfoLabel = new JLabel();
         	reconstPanel.add(harmonicResiduInfoLabel);
+        	
+        	this.harmonicResiduInfoPHLabel = new JLabel();
+        	reconstPanel.add(harmonicResiduInfoPHLabel);
+        	
         }
         
         { // residual chart panel
 			this.residuDataset = new DefaultXYDataset();
 			JFreeChartUtils.addDefaultXYDatasetSerie(residuDataset, "residu", xData, residualData);
+			JFreeChartUtils.addDefaultXYDatasetSerie(residuDataset, "residuPH", xData, residualDataPH);
 			
 			// JFreeChart
 			this.residualChart = ChartFactory.createXYLineChart(model.getName(), "time", "amplitude", residuDataset, true);
@@ -161,26 +185,41 @@ public class SoundAnalysisView {
 	
 			ValueAxis residualRangeAxis = residualChart.getXYPlot().getDomainAxis();
 			residualRangeAxis.setAutoRange(false);
-
-	        residuDataset.addChangeListener(new DatasetChangeListener() {
-				public void datasetChanged(DatasetChangeEvent event) {
-					// onMainChartDatasetChanged(event);
-				}
-			});
 	        
 	        reconstResiduPanel.add(residualChartPanel, BorderLayout.CENTER);
 			
         }
 
-        mainChart.addChangeListener(new ChartChangeListener() {
-			public void chartChanged(ChartChangeEvent event) {
-				onMainChartChanged(event);
-			}
-		});
-
+        { // FFT tab
+        	JSplitPane fftPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        	tabbedPane.add("fft", fftPanel);
+        	 
+        	
+			this.fftDataset = new DefaultXYDataset();
+			this.fftData = model.getFFTData();
+        	this.fftxData = JFreeChartUtils.createLinearDoubleRange(fftData.length);
+			JFreeChartUtils.addDefaultXYDatasetSerie(fftDataset, "fft", fftxData, fftData);
+			
+			// JFreeChart
+			this.fftChart = ChartFactory.createXYLineChart(model.getName(), "frequency", "amplitude", fftDataset, true);
+	
+	        // JPanel panel = new JPanel();
+	        this.fftChartPanel = new ChartPanel(fftChart);
+	        fftPanel.add(fftChartPanel);
+	        
+	        {
+	        JScrollPane scrollPane = new JScrollPane();
+	        this.fftTextPane = new JTextPane();
+	        scrollPane.setViewportView(fftTextPane);
+	        fftPanel.add(scrollPane);
+	        }
+	        fftPanel.setDividerLocation(400);
+        }
         
+        vertSplit.setDividerLocation(400);
+        
+        // this.tabbedPane.invalidate(); //?? 
         updateReconstData();
-        
 	}
 
 	
@@ -188,18 +227,32 @@ public class SoundAnalysisView {
 		int harmonicCount = (Integer) mainHarmonicCountSlider.getValue();
 		this.harmonicCountValueLabel.setText(Integer.toString(harmonicCount));
 
-		FFTResiduInfo residuInfo = new FFTResiduInfo();
+		ResiduInfo residuInfo = new ResiduInfo();
+		ResiduInfo residuInfoPH = new ResiduInfo();
+
+		double startTime = 0.0;
+		double endTime = startTime + model.getFrameDuration();
 
 		model.getReconstructedMainHarmonics(harmonicCount,
 				approxData,
 				residualData,
 				residuInfo);
 
+		model.getReconstructedMainHarmonicsPH(harmonicCount,
+				startTime, endTime, 
+				approxDataPH,
+				residualDataPH,
+				residuInfoPH);
+
 		mainDataset.seriesChanged(null);
 		residuDataset.seriesChanged(null);
 		
 		String residuInfoText = residuInfo.toStringFFTCoef();
 		this.harmonicResiduInfoLabel.setText(residuInfoText);
+
+		String residuInfoPHText = residuInfoPH.toStringFFTCoef();
+		this.harmonicResiduInfoPHLabel.setText(residuInfoPHText);
+
 	}
 
 	
@@ -232,5 +285,17 @@ public class SoundAnalysisView {
 		ValueAxis residualXAxis = residualChart.getXYPlot().getDomainAxis();
 		residualXAxis.setRange(lowerBound, upperBound);
 		
+		// display info of FFT in the current centered fragment
+		double center = (lowerBound + upperBound) / 2.0;
+		FFTCoefFragmentAnalysis[] fftCoefAnalysisFragments = model.getFFTCoefAnalysisFragments();
+		int fragsCount = fftCoefAnalysisFragments.length;
+		double xmin = -1.0, xmax = 1.0;
+		int frag = (int) ((center - xmin) / (xmax - xmin) * fragsCount);
+		if (frag < 0) frag = 0;
+		if (frag > fragsCount-1) frag = fragsCount -1;
+		FFTCoefFragmentAnalysis fftFrag = fftCoefAnalysisFragments[frag];
+		String fftText = fftFrag.toStringData();
+		fftTextPane.setText(fftText);
+
 	}
 }
