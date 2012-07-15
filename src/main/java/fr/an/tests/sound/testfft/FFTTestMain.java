@@ -1,10 +1,6 @@
 package fr.an.tests.sound.testfft;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-
-import ca.uol.aig.fftpack.RealDoubleFFT;
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
+import fr.an.tests.sound.testfft.sfft.FFT;
 import fr.an.tests.sound.testfft.sfft.FFTCoefEntry;
 import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis;
 
@@ -18,15 +14,26 @@ public class FFTTestMain
     {
         System.out.println( "Hello FFT World!" );
         
-        int inputLen = // 1024; // 2^10
+        int fragmentLen = // 1024; // 2^10
         		// 4096;
         		8192;
         // RealDoubleFFT rdFFT = new RealDoubleFFT(inputLen);
-        DoubleFFT_1D fft = new DoubleFFT_1D(inputLen);
         
-        double[] data = new double[inputLen];
+        int frameRate = 4000;
+        int frameLength = 1 * fragmentLen;
+        double duration = fragmentLen / frameRate;
+        double dt = 1.0 / frameRate; 
+        
+        		
+        double[] data = new double[fragmentLen];
+        FFT fft = new FFT(fragmentLen, frameRate);
 
-        FFTCoefFragmentAnalysis coefPrinter = new FFTCoefFragmentAnalysis(inputLen);
+        SoundAnalysisModel model = new SoundAnalysisModel("test");
+        model.setFrameRate(frameRate);
+        model.setAudioDataAsDouble(data);
+        
+        SoundFragmentAnalysis frag = new SoundFragmentAnalysis(model, 0, fragmentLen, 0.0, dt, fft); 
+        FFTCoefFragmentAnalysis fftFragAnalysis = new FFTCoefFragmentAnalysis(frag, fft);
         double Period = 2*Math.PI;
         double inv_Period = 1.0 / Period; 
 
@@ -34,10 +41,8 @@ public class FFTTestMain
     	double amplitudeEnd = 1.0; 
     			// 1.3;
 
-        double tau = Period / inputLen;
         double t = 0;
-        for (int i = 0; i < inputLen; i++, t += tau) {
-        	double ratioT = t * inv_Period;
+        for (int i = 0; i < frameLength; i++, t += dt) {
         	double linear = 1.0; // amplitudeStart + ratioT * (amplitudeEnd - amplitudeStart);
 //        	data.x[i] = 10 + 
 //        			+ 1 * Math.cos(1 * t) //
@@ -61,15 +66,13 @@ public class FFTTestMain
         }
         // data = new double[inputLen];
 
-                
-        // rdFFT.ft(data);
-        fft.realForward(data);
+        frag.setData(data);
+        frag.getFftCoefAnalysisFragment().computeAnalysis(null);
         
-        coefPrinter.setFFTData(data);
-        coefPrinter.printData();
+        fftFragAnalysis.printData();
         
         // extract main coeficient ...
-        FFTCoefEntry[] sortedCoefEntries = coefPrinter.getSortedCoefEntries();
+        FFTCoefEntry[] sortedCoefEntries = fftFragAnalysis.getSortedCoefEntries();
         FFTCoefEntry mainCoef = sortedCoefEntries[0];
         
         double mainCoefNorm = mainCoef.getNorm();

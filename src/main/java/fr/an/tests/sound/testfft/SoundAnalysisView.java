@@ -2,10 +2,10 @@ package fr.an.tests.sound.testfft;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -22,17 +22,15 @@ import javax.swing.event.ChangeListener;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.ChartChangeEvent;
 import org.jfree.chart.event.ChartChangeListener;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.Range;
-import org.jfree.data.event.DatasetChangeEvent;
-import org.jfree.data.event.DatasetChangeListener;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis;
+import fr.an.tests.sound.testfft.synth.PHCoefFragmentAnalysis;
 
 public class SoundAnalysisView {
 
@@ -120,6 +118,51 @@ public class SoundAnalysisView {
         	JPanel reconstPanel = new JPanel(new FlowLayout());
         	//tabbedPane.add("reconst-params", reconstPanel);
         	reconstResiduPanel.add(reconstPanel, BorderLayout.NORTH);
+        	
+        	JButton dumpBut = new JButton("dump");
+        	reconstPanel.add(dumpBut);
+        	dumpBut.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					FFTCoefFragmentAnalysis fftFrag = findCurrPlotFFTFragment();
+					if (fftFrag == null) {
+						System.err.println("FFT frag not found");
+						return; // SHOULD NOT OCCUR
+					}
+					
+					StringWriter buffer = new StringWriter();
+					PrintWriter debugPrinter = new PrintWriter(buffer); 
+					
+					fftFrag.computeAnalysis(debugPrinter);
+					
+					debugPrinter.flush();
+					String msg = buffer.toString();
+					System.out.println("dumpPH");
+					System.out.println(msg);
+					System.out.println();
+				}
+			});
+        	JButton dumpPHBut = new JButton("dumpPH");
+        	reconstPanel.add(dumpPHBut);
+        	dumpPHBut.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					PHCoefFragmentAnalysis phFrag = findCurrPlotPHFragment();
+					if (phFrag == null) {
+						System.err.println("PH frag not found");
+						return; // SHOULD NOT OCCUR
+					}
+					StringWriter buffer = new StringWriter();
+					PrintWriter debugPrinter = new PrintWriter(buffer); 
+					
+					phFrag.computeAnalysis(debugPrinter);
+					
+					debugPrinter.flush();
+					String msg = buffer.toString();
+					System.out.println("dumpPH");
+					System.out.println(msg);
+					System.out.println();
+				}
+			});
+        	
         	
         	
         	JButton butDomainZoomOut = new JButton("-");
@@ -230,16 +273,19 @@ public class SoundAnalysisView {
 		ResiduInfo residuInfo = new ResiduInfo();
 		ResiduInfo residuInfoPH = new ResiduInfo();
 
+		int frameLength = model.getFrameLength();
 		double startTime = 0.0;
-		double endTime = startTime + model.getFrameDuration();
-
+		// double endTime = startTime + model.getFrameDuration();
+		double dt = 1.0 / model.getFrameRate();
+		
 		model.getReconstructedMainHarmonics(harmonicCount,
+				0, frameLength, startTime, dt,
 				approxData,
 				residualData,
 				residuInfo);
 
 		model.getReconstructedMainHarmonicsPH(harmonicCount,
-				startTime, endTime, 
+				0, frameLength, startTime, dt, 
 				approxDataPH,
 				residualDataPH,
 				residuInfoPH);
@@ -274,6 +320,36 @@ public class SoundAnalysisView {
 		
 		xAxis.setRange(newLowerBound, newUpperBound);
 	}
+
+	private int getCurrPlotMidTimeIndex() {
+		XYPlot xyPlot = mainChart.getXYPlot();
+		ValueAxis xAxis = xyPlot.getDomainAxis();
+		Range xrange = xAxis.getRange();
+		double lowerBound = xrange.getLowerBound();
+		double upperBound = xrange.getUpperBound();
+		int mid = (int) (lowerBound + upperBound) / 2;
+		return mid;
+	}
+
+	private double getCurrPlotMidTime() {
+		int timeIndex = getCurrPlotMidTimeIndex();
+		double res = (double) timeIndex / model.getFrameRate();
+		return res;
+	}
+
+	private PHCoefFragmentAnalysis findCurrPlotPHFragment() {
+		int timeIndex = getCurrPlotMidTimeIndex();
+		PHCoefFragmentAnalysis res = model.findPHFragmentAtIndex(timeIndex);
+		return res;
+	}
+
+
+	private FFTCoefFragmentAnalysis findCurrPlotFFTFragment() {
+		int timeIndex = getCurrPlotMidTimeIndex();
+		FFTCoefFragmentAnalysis res = model.findFFTFragmentAtIndex(timeIndex);
+		return res;
+	}
+
 	
 	private void onMainChartChanged(ChartChangeEvent event) {
 		XYPlot xyPlot = mainChart.getXYPlot();
@@ -286,15 +362,8 @@ public class SoundAnalysisView {
 		residualXAxis.setRange(lowerBound, upperBound);
 		
 		// display info of FFT in the current centered fragment
-		double center = (lowerBound + upperBound) / 2.0;
-		FFTCoefFragmentAnalysis[] fftCoefAnalysisFragments = model.getFFTCoefAnalysisFragments();
-		int fragsCount = fftCoefAnalysisFragments.length;
-		double xmin = -1.0, xmax = 1.0;
-		int frag = (int) ((center - xmin) / (xmax - xmin) * fragsCount);
-		if (frag < 0) frag = 0;
-		if (frag > fragsCount-1) frag = fragsCount -1;
-		FFTCoefFragmentAnalysis fftFrag = fftCoefAnalysisFragments[frag];
-		String fftText = fftFrag.toStringData();
+		FFTCoefFragmentAnalysis currFFTFrag = findCurrPlotFFTFragment();
+		String fftText = currFFTFrag.toStringData();
 		fftTextPane.setText(fftText);
 
 	}

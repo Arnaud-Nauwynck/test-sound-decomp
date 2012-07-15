@@ -1,84 +1,86 @@
 package fr.an.tests.sound.testfft.sfft;
 
+import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import fr.an.tests.sound.testfft.DoubleFmtUtil;
 import fr.an.tests.sound.testfft.ResiduInfo;
+import fr.an.tests.sound.testfft.SoundFragmentAnalysis;
 
 
 public class FFTCoefFragmentAnalysis {
 
-    public static final double INV_2PI = 1.0 / (2*Math.PI);
-    public static final double CST_2_PI = 2*Math.PI;
+    private SoundFragmentAnalysis fragment;
 
-    
-	private final int dataLen;
-	private final int fftLen;
-	
+	private int fftLen;
+
 	double[] fftData;
 	
-	private double factorFft;
 	private FFTCoefEntry[] coefEntries;
 	private FFTCoefEntry[] sortedCoefEntries;
 
 	private double cumulatedSquareNormCoefs = 0.0;
 	
+	private FFT fft;
+	
 	// ------------------------------------------------------------------------
 	
-    public FFTCoefFragmentAnalysis(int len) {
-    	this.dataLen = len;
-    	this.fftLen = len / 2;
-    	this.factorFft = 2.0 / len;
-    	coefEntries = new FFTCoefEntry[fftLen];
-	    for (int i = 0; i < fftLen; i++) {
-	    	coefEntries[i] = new FFTCoefEntry(i);
-	    }
+    public FFTCoefFragmentAnalysis(SoundFragmentAnalysis fragment, FFT fft) {
+    	this.fragment = fragment;
+    	int fragmentLen = fragment.getFragmentLen();
+    	this.fft = fft;
+    	if (fft == null) {
+    		this.fft = new FFT(fragmentLen, fragment.getModel().getFrameRate());
+    	}
+		this.fftData = new double[fragmentLen];
+    	this.fftLen = fragment.getFragmentLen() / 2;
+    	coefEntries = FFTCoefEntry.newArray(fft, fftLen);
     	sortedCoefEntries = new FFTCoefEntry[fftLen];
     }
 
     // ------------------------------------------------------------------------
 
-	public int getDataLen() {
-		return dataLen;
-	}
+	public void computeAnalysis(PrintWriter debugPrinter) {
+		if (debugPrinter != null) {
+			debugPrinter.println("FFT");
+		}
+		fft.realForward(fragment.getFragmentData(), 0, fftData, coefEntries);
 
-    
-	public void setFFTData(double[] fftData) {
-		this.fftData = fftData;
-		
-		double cstBaseFrequency = CST_2_PI / fftData.length;
-		this.coefEntries[0].setData(fftData[fftLen], 0, factorFft, cstBaseFrequency);
-		
-		for (int i = 0; i < fftLen; i++) {
-			this.coefEntries[i].setData(fftData[2*i], fftData[2*i+1], factorFft, cstBaseFrequency);
+		// sort coefs
+        SortedSet<FFTCoefEntry> sortedCoefs = new TreeSet<FFTCoefEntry>(FFTCoefEntryNormDescComparator.INSTANCE);
+        sortedCoefs.addAll(Arrays.asList(coefEntries));
+        
+        { double tmpSum = 0.0;
+	        int i = 0;
+	        for(FFTCoefEntry e : sortedCoefs) {
+	        	sortedCoefEntries[i] = e;
+	        	double norm = e.getNorm();
+	        	tmpSum += norm * norm;
+	        	e.setCumulatedSquareNorm(tmpSum);
+	        	i++;
+	        }
+	        this.cumulatedSquareNormCoefs = tmpSum;
         }
-
-		sortCoefs();
+        
+        if (debugPrinter != null) {
+        	for (int i = 0; i < 10; i++) {
+            	FFTCoefEntry e = sortedCoefEntries[i];
+            	if (e.getNorm() < 0.05 || i >= 5) {
+            		break;
+            	}
+            	debugPrinter.println("sortFFT[" + i + "] " + e);
+            }
+        }
 	}
-	
+
+
 	public FFTCoefEntry[] getCoefEntries() {
 		return coefEntries;
 	}
-
-	protected void sortCoefs() {
-        SortedSet<FFTCoefEntry> sortedCoefs = new TreeSet<FFTCoefEntry>(FFTCoefEntryNormDescComparator.INSTANCE);
-        for (int i = 0; i < fftLen; i++) {
-        	FFTCoefEntry e = coefEntries[i];
-        	sortedCoefs.add(e);
-        }
-        
-        double tmpSum = 0.0;
-        int i = 0;
-        for(FFTCoefEntry e : sortedCoefs) {
-        	sortedCoefEntries[i] = e;
-        	tmpSum += e.norm * e.norm;
-        	e.cumulatedSquareNorm = tmpSum;
-        	i++;
-        }
-        this.cumulatedSquareNormCoefs = tmpSum;
-	}
-
+	
 	public FFTCoefEntry[] getSortedCoefEntries() {
 		return sortedCoefEntries;
 	}
@@ -102,9 +104,10 @@ public class FFTCoefFragmentAnalysis {
         double inv_cumulatedSquareNormCoefs = 1.0 / cumulatedSquareNormCoefs;
         for (int i = 0; i < fftLen; i++) {
         	FFTCoefEntry e = sortedCoefEntries[i];
-        	res += "rank:" + i + " " + e + " (" + (100 * e.cumulatedSquareNorm * inv_cumulatedSquareNormCoefs) + "%)\n";
-        	if ((e.cumulatedSquareNorm > cumulatedSquareNormMaxRatio && i > 10)
-        			|| (e.cumulatedSquareNorm > cumulatedSquareNormMaxRatio98)) {
+        	double e_cumulSquareNorm = e.getCumulatedSquareNorm(); 
+        	res += "rank:" + i + " " + e + " (" + DoubleFmtUtil.fmtDouble3(100.0 * e_cumulSquareNorm * inv_cumulatedSquareNormCoefs) + "%)\n";
+        	if ((e_cumulSquareNorm > cumulatedSquareNormMaxRatio && i > 10)
+        			|| (e_cumulSquareNorm > cumulatedSquareNormMaxRatio98)) {
         		break;
         	}
         	if (i >= 10) {
@@ -115,19 +118,19 @@ public class FFTCoefFragmentAnalysis {
 	}
 
 	public void getReconstructedMainHarmonics(final int harmonicCount, 
-			int resultStartIndex, int resultEndIndex, double[] resultData, ResiduInfo residuInfo) {
-		double tau = 1.0; //  / len;   TODO ??????????????
-		double ti = 0; // ????? resultStartIndex * tau;
-		for (int i = resultStartIndex; i < resultEndIndex; i++, ti+=tau) {
+			final int resultStartIndex, final int resultEndIndex, final double startTime, final double dt, 
+			double[] resultData, ResiduInfo residuInfo) {
+		double t = startTime;
+		for (int i = resultStartIndex; i < resultEndIndex; i++, t+=dt) {
 			double tmpapprox = 0;
 			for (int k = 0; k < harmonicCount; k++) {
 				FFTCoefEntry e = sortedCoefEntries[k];
-				tmpapprox += e.norm * Math.cos(e.omega * ti + e.phi);
+				tmpapprox += e.getNorm() * Math.cos(e.getOmega() * t + e.getPhi());
 			}
 			resultData[i] = tmpapprox;
 		}
 
-		residuInfo.cumulSquareNormCoef = sortedCoefEntries[harmonicCount].cumulatedSquareNorm;
+		residuInfo.cumulSquareNormCoef = sortedCoefEntries[harmonicCount].getCumulatedSquareNorm();
 		residuInfo.totalSquareNormCoef = cumulatedSquareNormCoefs;
 	}
 
@@ -138,7 +141,7 @@ public class FFTCoefFragmentAnalysis {
 		public int compare(FFTCoefEntry o1, FFTCoefEntry o2) {
 			if (o1 == o2) return 0;
 			int res;
-			if (o2.norm <= o1.norm) {
+			if (o2.getNorm() <= o1.getNorm()) {
 				res = -1; // reverse.. o1.compareTo(o2); 
 			} else {
 				res = +1;
@@ -147,5 +150,8 @@ public class FFTCoefFragmentAnalysis {
 		}
     	
     }
+
+
+
 
 }

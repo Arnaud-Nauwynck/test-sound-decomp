@@ -3,44 +3,43 @@ package fr.an.tests.sound.testfft.sfft;
 import fr.an.tests.sound.testfft.DoubleFmtUtil;
 
 public class FFTCoefEntry {
-	int index;
 	
-	double x;
-	double y;
+	private final FFT fft;
+	private final int index;
 	
-	double coefX;
-	double coefY;
+	private double coefCos;
+	private double coefSin;
 	
-	double norm;
-	double omega;
-	double phi;
-	double phi_div_2pi;
+	private double norm;
+	private double omega;
+	private double phi;
 	
-	double cumulatedSquareNorm;
+	private double cumulatedSquareNorm;
 
 	// ------------------------------------------------------------------------
 	
-	public FFTCoefEntry(int index) {
+	public FFTCoefEntry(FFT fft, int index) {
+		this.fft = fft;
 		this.index = index;
+	}
+	
+	public static FFTCoefEntry[] newArray(FFT fft, int len) {
+		FFTCoefEntry[] res = new FFTCoefEntry[len];
+		for (int i = 0; i < len; i++) {
+			res[i] = new FFTCoefEntry(fft, i);
+		}
+		return res;
 	}
 	
 	// ------------------------------------------------------------------------
 	
-	public void setData(double x, double y, double factorFft, double cstBaseFrequency) {
-    	this.x = x;
-    	this.y = y;
-    	
-		this.coefX = factorFft * x;
-    	if (index == 0) {
-    		this.coefX *= 0.5;
-    	}
-    	this.coefY = factorFft * y;
-    	this.omega = index * cstBaseFrequency;
-    	this.norm = Math.sqrt(coefX*coefX + coefY * coefY);
-    	this.phi = Math.atan2(coefY, coefX);
+	public void setData(double coefCos, double coefSin, double omega) {
+		this.coefCos = coefCos;
+    	this.coefSin = coefSin;
+    	this.omega = omega;
 
-    	this.phi_div_2pi = phi * FFTCoefFragmentAnalysis.INV_2PI;
-    	
+    	this.norm = Math.sqrt(coefCos * coefCos + coefSin * coefSin);
+    	this.phi = Math.atan2(coefSin, coefCos);
 	}
 	
 	
@@ -48,20 +47,12 @@ public class FFTCoefEntry {
 		return index;
 	}
 
-	public double getX() {
-		return x;
-	}
-
-	public double getY() {
-		return y;
-	}
-
 	public double getCoefX() {
-		return coefX;
+		return coefCos;
 	}
 
 	public double getCoefY() {
-		return coefY;
+		return coefSin;
 	}
 
 	public double getNorm() {
@@ -77,16 +68,28 @@ public class FFTCoefEntry {
 	}
 
 	public double getPhi_div_2pi() {
-		return phi_div_2pi;
+		return phi * FFT.INV_2PI;
 	}
 
 	public double getCumulatedSquareNorm() {
 		return cumulatedSquareNorm;
 	}
 
+	public void setCumulatedSquareNorm(double p) {
+		this.cumulatedSquareNorm = p;
+	}
+
 	public String toString() {
-		return "[" + index + "] r,i:" + DoubleFmtUtil.fmtDouble3(coefX) + "\t" + DoubleFmtUtil.fmtDouble3(coefY) 
-				+ " \t\t N,phi: " + DoubleFmtUtil.fmtDouble3(norm) + "\t" + DoubleFmtUtil.fmtDouble3(phi_div_2pi) + "*2pi"
-				+ "\t cumulSquare:" + DoubleFmtUtil.fmtDouble3(cumulatedSquareNorm);
+		return "[" + index + "] omega:" + DoubleFmtUtil.fmtDouble3(omega) 
+				+ " freq:" + DoubleFmtUtil.fmtDouble3(omega * FFT.INV_2PI
+						// * fft.getFragmentLen()
+						// * fft.getFragmentLen() * fft.getInvFrameRate()
+						) + " Hz"   
+//				+ " freqN/R:" + DoubleFmtUtil.fmtDouble3(omega * FFT.INV_2PI
+//								* (double)fft.getFragmentLen() * fft.getInvFrameRate()
+//								) + " Hz"   
+				+ " c,s:" + DoubleFmtUtil.fmtDouble3(coefCos) + "\t" + DoubleFmtUtil.fmtDouble3(coefSin) 
+				+ " \t\t N,phi: " + DoubleFmtUtil.fmtDouble3(norm) + "\t" + DoubleFmtUtil.fmtDouble3(phi * FFT.INV_PI) + "*pi"
+				+ (((cumulatedSquareNorm != 0.0))? "\t cumulSquare:" + DoubleFmtUtil.fmtDouble3(cumulatedSquareNorm) : "");
 	}
 }
