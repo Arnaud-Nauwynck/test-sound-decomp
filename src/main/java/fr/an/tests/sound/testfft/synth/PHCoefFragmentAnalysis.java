@@ -4,10 +4,15 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.alg.dense.linsol.LinearSolver;
+import org.ejml.alg.dense.linsol.LinearSolverFactory;
+import org.ejml.data.DenseMatrix64F;
+
 import Jama.CholeskyDecomposition;
 import Jama.Matrix;
 import fr.an.tests.sound.testfft.DoubleFmtUtil;
 import fr.an.tests.sound.testfft.DoubleUtil;
+import fr.an.tests.sound.testfft.QuadraticForm;
 import fr.an.tests.sound.testfft.ResiduInfo;
 import fr.an.tests.sound.testfft.SoundFragmentAnalysis;
 import fr.an.tests.sound.testfft.sfft.FFT;
@@ -48,7 +53,6 @@ public class PHCoefFragmentAnalysis {
 		int fragmentLen = fragment.getFragmentLen();
 		int fftLen = fragmentLen / 2; 
 		
-		double[] fftData = new double[fragmentLen];
 		FFT fft = fragment.getFft();
 		
 		List<PHCoefEntry> coefEntries = new ArrayList<PHCoefEntry>(MAX_PH_COEF_LEN);
@@ -65,12 +69,9 @@ public class PHCoefFragmentAnalysis {
 
 		double[] tmpResidualData = new double[fragmentLen];
 		
-		double[][] result_quad_p0p3p5 = new double[][] {
-				new double[3], new double[3], new double[3] 
-		};
-		double[] result_lin_p0p3p5 = new double[3];
-		double[] result_cst_p0p3p5 = new double[1];
-
+		QuadraticForm quad_p0p3p5 = new QuadraticForm(3);
+		DenseMatrix64F solved_p0p3p5 = new DenseMatrix64F(3, 1);
+		
 		if (debugPrinter != null) {
 			debugPrinter.print("init: set curr residu = data");
 		}
@@ -80,6 +81,8 @@ public class PHCoefFragmentAnalysis {
 		if (debugPrinter != null) {
 			debugPrinter.println("residu var0:" + var0);
 		}
+		
+		
 		
 		for (int i = 0; i < MAX_PH_COEF_LEN; i++) {
 			PHCoefEntry currCoefEntry = new PHCoefEntry();
@@ -98,13 +101,23 @@ public class PHCoefFragmentAnalysis {
 				debugPrinter.println("step PH coef[" + i + "], SFFT on curr residu => sort 1st harmonic:" + fftCoef0);
 			}
 
+			// TODO...
+//			int index0 = fftCoef0.getIndex();
+//			FFTCoefEntry fftCoef0_m1 = (index0 > 0)? fftFragmentAnalysis.getCoefEntries()[index0 - 1] : null;
+//			FFTCoefEntry fftCoef0_p1 = (index0 +1 < fftFragmentAnalysis.getCoefEntries().length)? fftFragmentAnalysis.getCoefEntries()[index0 + 1] : null;
 			double fftc0_a0 = fftCoef0.getNorm();
+			double fftc0_w = fftCoef0.getOmega();
+			double fftc0_phi = fftCoef0.getPhi();
+
+			// TEMPORARY FOR TEST
+//			fftc0_a0 = 1.0;
+//			fftc0_w = 440.0 * (2.0*Math.PI);
+//			fftc0_phi = 0.0;
+
 			if (Math.abs(fftc0_a0) < 1e-6) {
 				break;
 			}
-			double fftc0_w = fftCoef0.getOmega();
-			double fftc0_phi = fftCoef0.getPhi();
-			
+
 			if (debugPrinter != null) {
 				debugPrinter.println("PH coef: set init guess p0,p1,p2: " + fftc0_a0 + ", " + fftc0_w + ", " + fftc0_phi);
 			}
@@ -142,56 +155,43 @@ public class PHCoefFragmentAnalysis {
 			
 			currCoefEntry.expandVarValues_Quadratic_p0p3p5(startTime, endTime, fragmentLen, times, 
 					residualData,
-					result_quad_p0p3p5, result_lin_p0p3p5, result_cst_p0p3p5);
-
-			Matrix matrixQuadp0p3p5 = new Matrix(result_quad_p0p3p5);
-			Matrix matrixLinp0p3p5 = new Matrix(result_lin_p0p3p5, 3);
+					quad_p0p3p5);
 
 			if (debugPrinter != null) {
-				debugPrinter.println("compute quad form for p0,p1,p2\n" + 
-						DoubleFmtUtil.fmtDouble3(result_quad_p0p3p5) 
-						+ "lin: " + DoubleFmtUtil.fmtDouble3(result_lin_p0p3p5)
-						);
+				debugPrinter.println("compute quad form for p0,p3,p5\n" + quad_p0p3p5);
 			}
 			
+			double[] p = currCoefEntry.getP();
+
 			// => pseudo inverse matrix p0p3p5 (quadratic form)
-			// TODO 
-			
-			CholeskyDecomposition cholesky_quad_p0p3p5 = new CholeskyDecomposition(matrixQuadp0p3p5);
-			if (cholesky_quad_p0p3p5.isSPD()) {
-				Matrix p0p3p5_solved = cholesky_quad_p0p3p5.solve(matrixLinp0p3p5);
-				double new_p0 = - 0.5 * p0p3p5_solved.get(0, 0);
-				double new_p3 = - 0.5 * p0p3p5_solved.get(1, 0);
-				double new_p5 = - 0.5 * p0p3p5_solved.get(2, 0);
+			boolean solvedOK = quad_p0p3p5.solveArgMin(solved_p0p3p5);
+			if (solvedOK) {
+				double ejml_new_p0 = solved_p0p3p5.get(0);
+				double ejml_new_p3 = solved_p0p3p5.get(1);
+				double ejml_new_p5 = solved_p0p3p5.get(2);
 				
-				double[] p = currCoefEntry.getP();
-
+				double expectedSolvedVar = quad_p0p3p5.eval(solved_p0p3p5);
 				if (debugPrinter != null) {
-					debugPrinter.println("solve B/2A => new p0,p3,p5: "
-							+ new_p0 + " (" + p[0] + ")"
-							+ ", p3:" + new_p3 + " (" + p[3] + ")"
-							+ ", p5:" + new_p5 + " (" + p[5] + ")"
-							);
+					debugPrinter.println("solve quad min (pseudo inverse) => "
+							+ "p0,p3,p5:" + DoubleFmtUtil.fmtDouble3(solved_p0p3p5)
+							+ ", expected residu var:" + DoubleFmtUtil.fmtDouble3(expectedSolvedVar));
 				}
-
-				if (Math.abs(new_p0 - p[0]) < 50.0) {
-					p[0] = new_p0;
+				
+				if (Math.abs(ejml_new_p0 - p[0]) < 50.0
+						&& Math.abs(ejml_new_p3 - p[3]) < 50.0
+						&& Math.abs(ejml_new_p5 - p[5]) < 50.0) {
+					p[0] = ejml_new_p0;
+					p[3] = ejml_new_p3;
+					p[5] = ejml_new_p5;
 				} else {
-					if (debugPrinter != null) debugPrinter.println("REJECTED new p0!");
+					if (debugPrinter != null) debugPrinter.println("REJECTED !");
 				}
-				if (Math.abs(new_p3 - p[3]) < 10.0) {
-					p[3] = new_p3;
-				} else {
-					if (debugPrinter != null) debugPrinter.println("REJECTED new p3!");
-				}
-				if (Math.abs(new_p5 - p[5]) < 5.0) {
-					p[5] = new_p5;
-				} else {
-					if (debugPrinter != null) debugPrinter.println("REJECTED new p5!");
-				}
+				
+			
 			} else {
 				if (debugPrinter != null) {
-					debugPrinter.print("*** quad matrix NOT sym definite positive!?");
+					debugPrinter.println("*** quad matrix NOT sym definite positive!?");
+					coefEntries.add(currCoefEntry);
 				}
 			}
 			
@@ -220,6 +220,7 @@ public class PHCoefFragmentAnalysis {
 		final double dht = 1.0 / (resultEndIndex - resultStartIndex);
 		double t = startTime;
 		double ht = 0.0;
+		int hi = 0;
 		int maxHarmonicCount = Math.min(harmonicCount, sortedCoefEntries.length);
 		IntermediateTParams it = new IntermediateTParams();
 		for (int i = resultStartIndex; i < resultEndIndex; i++) {
@@ -231,10 +232,12 @@ public class PHCoefFragmentAnalysis {
 			}
 			resultData[i] = tmpapprox;
 			
-			// t += dt;
-			// ht += dht;
-			t = startTime + dt * i; // same but less rounding errors?
-			ht = dht * i;
+//			t += dt;
+//			ht += dht;
+			// same but less rounding errors?
+			hi++;
+			t = startTime + dt * hi;
+			ht = dht * hi;
 		}
 
 //		residuInfo.cumulSquareNormCoef = ;

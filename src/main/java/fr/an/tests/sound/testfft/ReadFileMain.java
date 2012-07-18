@@ -37,12 +37,12 @@ public class ReadFileMain {
 //			"fl-mi.wav",
 //			"fl-sol.wav",
 				
-//			"fl-la.wav",
+			"fl-la.wav",
 			
 //			"fl-si.wav"
 		};
 
-		boolean useSynthPH = false;
+		boolean useSynthPH = true;
 		boolean useSynth = true;
 
 		boolean play = 
@@ -66,7 +66,7 @@ public class ReadFileMain {
 		}
 
 		int frameRate = 8000;  // Hz
-		int fragmentLen = 4*2048; // 2048/8000~=250 ms   4096/8000~=500ms  8192/80002=1sec
+		int fragmentLen = 2048; // 2048/8000~=250 ms   4096/8000~=500ms  8192/80002=1sec
 		int totalFrameLength = 4 * fragmentLen; // (int) (1.5 * 8000); // = 1.5 sec 
 		int synthFragmentsCount = totalFrameLength / fragmentLen;
 		
@@ -105,7 +105,7 @@ public class ReadFileMain {
 		}
 		
 		if (useSynthPH) {
-			SoundAnalysisModel model = new SoundAnalysisModel("synth");
+			SoundAnalysisModel model = new SoundAnalysisModel("PH-synth");
 			model.setFrameRate(frameRate);
 			SoundFragmentAnalysis[] fragments = new SoundFragmentAnalysis[synthFragmentsCount];
 			int currStartIndex = 0;
@@ -169,7 +169,7 @@ public class ReadFileMain {
 			int totalFrameLength,
 			SoundFragmentAnalysis[] fragments,
 			JTabbedPane tabbedPane, boolean play) {
-		System.out.println("synthetizing " + synthName);
+		// System.out.println("synthetizing " + synthName);
 		
 		SoundAnalysisModel model = new SoundAnalysisModel(synthName);
 		model.setFrameRate(frameRate);
@@ -187,10 +187,9 @@ public class ReadFileMain {
 			int currEndIndex = currStartIndex + fragLen;
 			
 			int harmonicCount = phFrag.getSortedCoefEntries().length;
-			double fragStartTime = currStartTime;
 			
 			phFrag.getReconstructedMainHarmonics(harmonicCount, 
-					currStartIndex, currEndIndex, fragStartTime, dt, 
+					currStartIndex, currEndIndex, currStartTime, dt, 
 					synthData, null);
 			
 			currStartIndex = currEndIndex;

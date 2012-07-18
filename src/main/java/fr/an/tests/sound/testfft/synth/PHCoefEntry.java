@@ -1,5 +1,9 @@
 package fr.an.tests.sound.testfft.synth;
 
+import org.ejml.data.DenseMatrix64F;
+
+import fr.an.tests.sound.testfft.QuadraticForm;
+
 /**
  * coefficient for a pseudo (perturbated) harmonic, with 2 sub-harmonics
  * <code>a0 sin( w0.t + phi0 ) + a1 sin(2.w0.t + phi1 ) + a2 sin(3.w0.t + phi2 )</code>
@@ -168,21 +172,25 @@ public class PHCoefEntry {
 	public void expandVarValues_Quadratic_p0p3p5(
 			double startTime, double endTime, int dataLen, double[] times, 
 			double[] data, 
-			double[][] result_quad_p0p3p5, double[] result_lin_p0p3p5, double[] result_cst) {
+			QuadraticForm result_quad) {
 		IntermediateTParams it = new IntermediateTParams();
 		
-		result_quad_p0p3p5[0][0] = 0.0;
-		result_quad_p0p3p5[0][0] = 0.0;
-		result_quad_p0p3p5[1][1] = 0.0;
-		result_quad_p0p3p5[2][2] = 0.0;
-		result_quad_p0p3p5[0][1] = 0.0; 
-		result_quad_p0p3p5[0][2] = 0.0;
-		result_quad_p0p3p5[1][2] = 0.0; 
 
-		result_lin_p0p3p5[0] = 0.0;
-		result_lin_p0p3p5[1] = 0.0;
-		result_lin_p0p3p5[2] = 0.0;
+		double tmpres_quad00 = 0.0;
+		double tmpres_quad01 = 0.0;
+		double tmpres_quad02 = 0.0;
+		double tmpres_quad11 = 0.0;
+		double tmpres_quad12 = 0.0;
+		double tmpres_quad22 = 0.0;
 
+		double tmpres_lin0 = 0.0;
+		double tmpres_lin1 = 0.0;
+		double tmpres_lin2 = 0.0;
+		double tmpres_cst = 0.0;
+		
+		boolean doCheck = true;
+		double totalVar = 0.0;
+		
 		double invDuration = 1.0 / (endTime - startTime); 
 		for (int i = 0, len = times.length; i < len; i++) {
 			double t = times[i];
@@ -190,25 +198,33 @@ public class PHCoefEntry {
 			precomputeForT(it, t, ht);
 			
 			// double value = computeValue(times[i], itparams);
-			// value = (p0 + p3.t + p5.t^2) * it.cos_w0tp0 
-			//       + ((p0 + p3.t + p5.t^2) * p7  + p8 ) * it.cos_w1tp1 
-			//		 + ((p0 + p3.t + p5.t^2) * p10 + p11) * it.cos_w2tp2;
+			// value = (p0 + p3.ht + p5.ht^2) * it.cos_w0tp0 
+			//       + ((p0 + p3.ht + p5.ht^2) * p7  + p8 ) * it.cos_w1tp1 
+			//		 + ((p0 + p3.ht + p5.ht^2) * p10 + p11) * it.cos_w2tp2;
 			
 			// => value = p0 * c0 + p3 * c3 + p5 * c5 + k 
 			double c0 = it.cos_w0tp0
 						+ p[7] * it.cos_w1tp1 
 						+ p[10] * it.cos_w2tp2;
-			double c3 = t * ( 
+			double c3 = ht * ( 
 					  it.cos_w0tp0
 					+ p[7] * it.cos_w1tp1 
 					+ p[10] * it.cos_w2tp2);
-			double c5 = t * t * (
+			double c5 = ht * ht * (
 					  it.cos_w0tp0
 					+ p[7] * it.cos_w1tp1 
 					+ p[10] * it.cos_w2tp2);
 			double k = p[8]  * it.cos_w1tp1
 					+ p[11] * it.cos_w2tp2;
 
+			double value = 0.0;
+			if (doCheck) {
+				double checkValue = p[0] * c0 + p[3] * c3 + p[5] * c5 + k;
+				value = computeValue(t, it);
+				if (Math.abs(value - checkValue) > 1e-5) {
+					System.err.println("should not occur: checkValue != value ...");
+				}
+			}
 			// err = data - value  
 			//     = (data - (p0 * c0 + p3 * c3 + p5 * c5 + k))
 			//     = (d - (p0 * c0 + p3 * c3 + p5 * c5 ))
@@ -220,24 +236,62 @@ public class PHCoefEntry {
 			//			+ p0*p3 * (2*c0*c3) + p0*p5 * (2*c0*c5) + p3*p5 * (2*c3*c5) 
 			// 			+ p0 *(-2*d*c0) + p3 *(-2*d*c3) + p5 * (-2*d*c5) )
 			// 			+ d*d
-			result_quad_p0p3p5[0][0] += c0 * c0;
-			result_quad_p0p3p5[1][1] += c3 * c3;
-			result_quad_p0p3p5[2][2] += c5 * c5;
-			result_quad_p0p3p5[0][1] += c0 * c3; 
-			result_quad_p0p3p5[0][2] += c0 * c5;
-			result_quad_p0p3p5[1][2] += c3 * c5; 
+			tmpres_quad00 += c0 * c0;
+			tmpres_quad11 += c3 * c3;
+			tmpres_quad22 += c5 * c5;
+			tmpres_quad01 += c0 * c3; 
+			tmpres_quad02 += c0 * c5;
+			tmpres_quad12 += c3 * c5; 
 
-			result_lin_p0p3p5[0] += - 2 * d * c0;
-			result_lin_p0p3p5[1] += - 2 * d * c3;
-			result_lin_p0p3p5[2] += - 2 * d * c5;
+			tmpres_lin0 += d * c0;
+			tmpres_lin1 += d * c3;
+			tmpres_lin2 += d * c5;
 
-			if (result_cst != null) {
-				result_cst[0] += d * d;
+			tmpres_cst += d * d;
+			
+			if (doCheck) {
+				double checkVar = c0*c0*p[0]*p[0] + c3*c3*p[3]*p[3] + c5*c5*p[5]*p[5]
+						+ 2.0 * ( c0*c3*p[0]*p[3] + c0*c5*p[0]*p[5] + c3*c5*p[3]*p[5])
+						- 2.0 * d*(c0*p[0] + c3*p[3] + c5*p[5])
+						+ d * d;
+				double var = (data[i] - value) * (data[i] - value);
+				totalVar += var; 
+				if (Math.abs(var - checkVar) > 1e-4) {
+					System.err.println("should not occur: checkVar != var ...");
+				}
 			}
 		}
-		result_quad_p0p3p5[1][0] = result_quad_p0p3p5[0][1];
-		result_quad_p0p3p5[2][0] = result_quad_p0p3p5[0][2];
-		result_quad_p0p3p5[2][1] = result_quad_p0p3p5[1][2];
+		
+		result_quad.setQuadCoefs(0, 0, tmpres_quad00);
+		result_quad.setQuadCoefs(1, 1, tmpres_quad11);
+		result_quad.setQuadCoefs(2, 2, tmpres_quad22);
+		
+		result_quad.setQuadCoefs(0, 1, tmpres_quad01); 
+		result_quad.setQuadCoefs(0, 2, tmpres_quad02);
+		result_quad.setQuadCoefs(1, 2, tmpres_quad12); 
+		
+		result_quad.setQuadCoefs(1, 0, tmpres_quad01);
+		result_quad.setQuadCoefs(2, 0, tmpres_quad02);
+		result_quad.setQuadCoefs(2, 1, tmpres_quad12);
+
+		result_quad.setLinCoefs(0, -2.0 * tmpres_lin0);
+		result_quad.setLinCoefs(1, -2.0 * tmpres_lin1);
+		result_quad.setLinCoefs(2, -2.0 * tmpres_lin2);
+		
+		result_quad.setConstCoefs(tmpres_cst);
+		
+		
+		if (doCheck) {
+			DenseMatrix64F x = new DenseMatrix64F(3);
+			x.set(0, p[0]);
+			x.set(1, p[3]);
+			x.set(2, p[5]);
+			double checkTotalVar = result_quad.eval(x);
+			if (Math.abs(totalVar - checkTotalVar) > 1e-3) {
+				System.err.println("should not occur: checkTotalVar != totalVar ...");
+			}
+
+		}
 	}
 	
 }

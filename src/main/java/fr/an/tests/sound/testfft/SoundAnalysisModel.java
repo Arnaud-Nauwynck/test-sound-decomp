@@ -305,14 +305,14 @@ public class SoundAnalysisModel {
 		int fragIndex = 0;
 		int currStartIndex = 0;
 		double currFragStartTime = startTime;
-		for (fragIndex = 0; fragIndex < fragmentsCount; fragIndex++) {
-			SoundFragmentAnalysis frag = fragments[fragIndex];
-			if (frag.getStartFrameIndex() > currStartIndex) {
-				currStartIndex += frag.getFragmentLen(); 
-				currFragStartTime += frag.getDuration();
-				continue;
-			}
-		}
+//		for (fragIndex = 0; fragIndex < fragmentsCount; fragIndex++) {
+//			SoundFragmentAnalysis frag = fragments[fragIndex];
+//			if (frag.getStartFrameIndex() > currStartIndex) {
+//				currStartIndex += frag.getFragmentLen(); 
+//				currFragStartTime += frag.getDuration();
+//				continue;
+//			}
+//		}
 		for (; fragIndex < fragmentsCount; fragIndex++) {
 			SoundFragmentAnalysis frag = fragments[fragIndex];
 			if (currStartIndex > frag.getStartFrameIndex() + frag.getFragmentLen()) {

@@ -363,8 +363,11 @@ public class SoundAnalysisView {
 		
 		// display info of FFT in the current centered fragment
 		FFTCoefFragmentAnalysis currFFTFrag = findCurrPlotFFTFragment();
-		String fftText = currFFTFrag.toStringData();
-		fftTextPane.setText(fftText);
-
+		if (currFFTFrag != null) {
+			String fftText = currFFTFrag.toStringData();
+			fftTextPane.setText(fftText);
+		} else {
+			fftTextPane.setText("");
+		}
 	}
 }
