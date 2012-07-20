@@ -106,22 +106,22 @@ public class PHCoefEntry {
 		return varRes;
 	}
 
-	public double computeResidualValues(double startTime, double endTime, int timeLen, double[] times,
+	public double computeResidualValues(double startTime, double endTime, int timeLen, 
 			double[] resultResidu, double[] origData) {
 		double varRes = 0.0;
 		IntermediateTParams itparams = new IntermediateTParams();
 		final double dt = (endTime - startTime) / timeLen;
 		final double dht = 1.0 / timeLen;
-		double t = startTime;
+		double absoluteT = startTime;
 		double ht = 0.0;
-		for (int i = 0, len = times.length; i < len; i++) {
-			precomputeForT(itparams, t, ht);
-			double value = computeValue(times[i], itparams);
+		for (int i = 0, len = timeLen; i < len; i++) {
+			precomputeForT(itparams, absoluteT, ht);
+			double value = computeValue(absoluteT, itparams);
 			double err = origData[i] - value; 
 			resultResidu[i] = err;
 			varRes += err * err; 
 
-			t += dt;
+			absoluteT += dt;
 			ht += dht;
 		}
 		return varRes;
@@ -193,9 +193,9 @@ public class PHCoefEntry {
 		
 		double invDuration = 1.0 / (endTime - startTime); 
 		for (int i = 0, len = times.length; i < len; i++) {
-			double t = times[i];
-			double ht = (t - startTime) * invDuration;
-			precomputeForT(it, t, ht);
+			double absoluteT = times[i];
+			double ht = (absoluteT - startTime) * invDuration;
+			precomputeForT(it, absoluteT, ht);
 			
 			// double value = computeValue(times[i], itparams);
 			// value = (p0 + p3.ht + p5.ht^2) * it.cos_w0tp0 
@@ -220,7 +220,7 @@ public class PHCoefEntry {
 			double value = 0.0;
 			if (doCheck) {
 				double checkValue = p[0] * c0 + p[3] * c3 + p[5] * c5 + k;
-				value = computeValue(t, it);
+				value = computeValue(absoluteT, it);
 				if (Math.abs(value - checkValue) > 1e-5) {
 					System.err.println("should not occur: checkValue != value ...");
 				}

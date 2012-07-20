@@ -196,7 +196,7 @@ public class PHCoefFragmentAnalysis {
 			}
 			
 			// compute residualData for next iteration
-			double var = currCoefEntry.computeResidualValues(startTime, endTime, fragmentLen, times, 
+			double var = currCoefEntry.computeResidualValues(startTime, endTime, fragmentLen,  
 					tmpResidualData, residualData);
 			currCoefEntry.setResidualVar(var);
 			double[] tmp = tmpResidualData;
