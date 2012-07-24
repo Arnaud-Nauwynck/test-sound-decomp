@@ -6,9 +6,9 @@ import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import fr.an.tests.sound.testfft.DoubleFmtUtil;
 import fr.an.tests.sound.testfft.ResiduInfo;
 import fr.an.tests.sound.testfft.SoundFragmentAnalysis;
+import fr.an.tests.sound.testfft.utils.DoubleFmtUtil;
 
 
 public class FFTCoefFragmentAnalysis {
@@ -76,6 +76,10 @@ public class FFTCoefFragmentAnalysis {
         }
 	}
 
+	
+	public double[] getFftData() {
+		return fftData;
+	}
 
 	public FFTCoefEntry[] getCoefEntries() {
 		return coefEntries;

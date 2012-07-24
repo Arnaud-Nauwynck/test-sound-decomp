@@ -2,7 +2,7 @@ package fr.an.tests.sound.testfft.synth;
 
 import org.ejml.data.DenseMatrix64F;
 
-import fr.an.tests.sound.testfft.QuadraticForm;
+import fr.an.tests.sound.testfft.func.QuadraticForm;
 
 /**
  * coefficient for a pseudo (perturbated) harmonic, with 2 sub-harmonics
@@ -11,6 +11,8 @@ import fr.an.tests.sound.testfft.QuadraticForm;
  */
 public class PHCoefEntry {
 
+	private static final boolean DEBUG = false;
+	
 	public static final int MAX_P_LEN = 13;
 	
 //	private double t0;
@@ -170,7 +172,7 @@ public class PHCoefEntry {
 
 
 	public void expandVarValues_Quadratic_p0p3p5(
-			double startTime, double endTime, int dataLen, double[] times, 
+			double startTime, double endTime, int dataLen,  
 			double[] data, 
 			QuadraticForm result_quad) {
 		IntermediateTParams it = new IntermediateTParams();
@@ -191,9 +193,10 @@ public class PHCoefEntry {
 		boolean doCheck = true;
 		double totalVar = 0.0;
 		
-		double invDuration = 1.0 / (endTime - startTime); 
-		for (int i = 0, len = times.length; i < len; i++) {
-			double absoluteT = times[i];
+		final double dt = (endTime - startTime) / dataLen;
+		final double invDuration = 1.0 / (endTime - startTime);
+		double absoluteT = startTime;
+		for (int i = 0; i < dataLen; i++,absoluteT+=dt) {
 			double ht = (absoluteT - startTime) * invDuration;
 			precomputeForT(it, absoluteT, ht);
 			
@@ -218,10 +221,10 @@ public class PHCoefEntry {
 					+ p[11] * it.cos_w2tp2;
 
 			double value = 0.0;
-			if (doCheck) {
+			if (DEBUG && doCheck) {
 				double checkValue = p[0] * c0 + p[3] * c3 + p[5] * c5 + k;
 				value = computeValue(absoluteT, it);
-				if (Math.abs(value - checkValue) > 1e-5) {
+				if (Math.abs(value - checkValue) > 1e-3) {
 					System.err.println("should not occur: checkValue != value ...");
 				}
 			}
@@ -249,7 +252,7 @@ public class PHCoefEntry {
 
 			tmpres_cst += d * d;
 			
-			if (doCheck) {
+			if (DEBUG && doCheck) {
 				double checkVar = c0*c0*p[0]*p[0] + c3*c3*p[3]*p[3] + c5*c5*p[5]*p[5]
 						+ 2.0 * ( c0*c3*p[0]*p[3] + c0*c5*p[0]*p[5] + c3*c5*p[3]*p[5])
 						- 2.0 * d*(c0*p[0] + c3*p[3] + c5*p[5])
@@ -281,7 +284,7 @@ public class PHCoefEntry {
 		result_quad.setConstCoefs(tmpres_cst);
 		
 		
-		if (doCheck) {
+		if (DEBUG && doCheck) {
 			DenseMatrix64F x = new DenseMatrix64F(3);
 			x.set(0, p[0]);
 			x.set(1, p[3]);

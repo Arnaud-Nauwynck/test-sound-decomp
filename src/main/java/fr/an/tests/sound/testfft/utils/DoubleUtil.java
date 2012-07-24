@@ -1,4 +1,4 @@
-package fr.an.tests.sound.testfft;
+package fr.an.tests.sound.testfft.utils;
 
 public class DoubleUtil {
 

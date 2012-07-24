@@ -1,5 +1,7 @@
-package fr.an.tests.sound.testfft;
+package fr.an.tests.sound.testfft.utils;
 
+import fr.an.tests.sound.testfft.SoundAnalysisModel;
+import fr.an.tests.sound.testfft.SoundFragmentAnalysis;
 import fr.an.tests.sound.testfft.sfft.FFT;
 import fr.an.tests.sound.testfft.sfft.FFTCoefEntry;
 import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis;

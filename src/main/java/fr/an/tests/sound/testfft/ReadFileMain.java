@@ -27,7 +27,7 @@ public class ReadFileMain {
 			// missing... "fl-do-gr.wav",
 //			"fl-re-gr.wav",
 //			"fl-mi-gr.wav",
-//			"fl-fa-gr.wav",
+			"fl-fa-gr.wav",
 //			"fl-sol-gr.wav",
 //			"fl-la-gr.wav",
 //			"fl-si-gr.wav",
@@ -37,7 +37,7 @@ public class ReadFileMain {
 //			"fl-mi.wav",
 //			"fl-sol.wav",
 				
-			"fl-la.wav",
+//			"fl-la.wav",
 			
 //			"fl-si.wav"
 		};

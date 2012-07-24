@@ -1,4 +1,4 @@
-package fr.an.tests.sound.testfft.sft;
+package fr.an.tests.sound.testfft.sfft;
 
 import java.util.Arrays;
 import java.util.SortedSet;

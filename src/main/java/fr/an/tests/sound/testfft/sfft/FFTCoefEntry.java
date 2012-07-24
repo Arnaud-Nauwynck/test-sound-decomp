@@ -1,6 +1,6 @@
 package fr.an.tests.sound.testfft.sfft;
 
-import fr.an.tests.sound.testfft.DoubleFmtUtil;
+import fr.an.tests.sound.testfft.utils.DoubleFmtUtil;
 
 public class FFTCoefEntry {
 	
@@ -81,15 +81,14 @@ public class FFTCoefEntry {
 
 	public String toString() {
 		return "[" + index + "] omega:" + DoubleFmtUtil.fmtDouble3(omega) 
-				+ " freq:" + DoubleFmtUtil.fmtDouble3(omega * FFT.INV_2PI
+				+ " freq:" + DoubleFmtUtil.fmtFreqDouble3(omega)
 						// * fft.getFragmentLen()
 						// * fft.getFragmentLen() * fft.getInvFrameRate()
-						) + " Hz"   
 //				+ " freqN/R:" + DoubleFmtUtil.fmtDouble3(omega * FFT.INV_2PI
 //								* (double)fft.getFragmentLen() * fft.getInvFrameRate()
 //								) + " Hz"   
 				+ " c,s:" + DoubleFmtUtil.fmtDouble3(coefCos) + "\t" + DoubleFmtUtil.fmtDouble3(coefSin) 
-				+ " \t\t N,phi: " + DoubleFmtUtil.fmtDouble3(norm) + "\t" + DoubleFmtUtil.fmtDouble3(phi * FFT.INV_PI) + "*pi"
+				+ " \t\t N,phi: " + DoubleFmtUtil.fmtDouble3(norm) + "\t" + DoubleFmtUtil.fmtPhaseDouble3(phi)
 				+ (((cumulatedSquareNorm != 0.0))? "\t cumulSquare:" + DoubleFmtUtil.fmtDouble3(cumulatedSquareNorm) : "");
 	}
 }

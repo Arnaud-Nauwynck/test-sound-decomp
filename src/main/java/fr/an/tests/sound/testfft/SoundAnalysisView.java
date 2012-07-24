@@ -29,8 +29,10 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.Range;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import fr.an.tests.sound.testfft.sfft.FFTCoefEntry;
 import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis;
 import fr.an.tests.sound.testfft.synth.PHCoefFragmentAnalysis;
+import fr.an.tests.sound.testfft.utils.JFreeChartUtils;
 
 public class SoundAnalysisView {
 
@@ -239,8 +241,8 @@ public class SoundAnalysisView {
         	 
         	
 			this.fftDataset = new DefaultXYDataset();
-			this.fftData = model.getFFTData();
-        	this.fftxData = JFreeChartUtils.createLinearDoubleRange(fftData.length);
+			this.fftData = new double[model.getFragmentLen() / 2]; // model.getFFTData();
+        	this.fftxData = JFreeChartUtils.createLinearDoubleRange(fftData.length, 0, fftData.length * 4); // ?? * Math.PI
 			JFreeChartUtils.addDefaultXYDatasetSerie(fftDataset, "fft", fftxData, fftData);
 			
 			// JFreeChart
@@ -363,11 +365,23 @@ public class SoundAnalysisView {
 		
 		// display info of FFT in the current centered fragment
 		FFTCoefFragmentAnalysis currFFTFrag = findCurrPlotFFTFragment();
+		
 		if (currFFTFrag != null) {
 			String fftText = currFFTFrag.toStringData();
 			fftTextPane.setText(fftText);
+			// System.arraycopy(currFFTFrag.getFftData(), 0, fftData, 0, fftData.length);
+			
+			FFTCoefEntry[] fftCoefEntries = currFFTFrag.getCoefEntries();
+			for (int i = 0; i < fftData.length; i++) {
+				fftData[i] = fftCoefEntries[i].getNorm();
+			}
+			
 		} else {
 			fftTextPane.setText("");
+			for (int i = 0; i < fftData.length; i++) {
+				fftData[i] = 0;
+			}
 		}
+		fftDataset.seriesChanged(null);
 	}
 }

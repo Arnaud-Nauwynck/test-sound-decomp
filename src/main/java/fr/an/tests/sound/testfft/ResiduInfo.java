@@ -1,5 +1,7 @@
 package fr.an.tests.sound.testfft;
 
+import fr.an.tests.sound.testfft.utils.DoubleFmtUtil;
+
 public class ResiduInfo {
 
 	public double cumulSquareNormCoef;

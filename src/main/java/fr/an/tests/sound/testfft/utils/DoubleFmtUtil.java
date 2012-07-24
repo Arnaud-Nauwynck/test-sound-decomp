@@ -1,9 +1,13 @@
-package fr.an.tests.sound.testfft;
+package fr.an.tests.sound.testfft.utils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import org.ejml.data.DenseMatrix64F;
+
+import fr.an.tests.sound.testfft.func.CosSinPolynom2;
+import fr.an.tests.sound.testfft.func.QuadraticForm;
+import fr.an.tests.sound.testfft.sfft.FFT;
 
 public class DoubleFmtUtil {
 
@@ -13,6 +17,14 @@ public class DoubleFmtUtil {
     	return DBL_FMT3.format(v);
     }
 
+    public static String fmtPhaseDouble3(double v) {
+    	return fmtDouble3(v * FFT.INV_PI) + "*pi";
+    }
+
+    public static String fmtFreqDouble3(double v) {
+    	return fmtDouble3(v * FFT.INV_2PI) + " Hz"; // TOCHECH  frameRate/fragmentLen ...
+    }
+    
     public static String fmtDouble3(double[] vect) {
     	StringBuilder sb = new StringBuilder();
     	fmtDouble3(sb, vect);
@@ -70,4 +82,33 @@ public class DoubleFmtUtil {
 	    	}
     	}
     }
+
+    public static String fmtDouble3(QuadraticForm quadForm) {
+    	StringBuilder sb = new StringBuilder();
+    	fmtDouble3(sb, quadForm);
+    	return sb.toString();
+    }
+    
+	public static void fmtDouble3(StringBuilder sb, QuadraticForm quadForm) {
+		sb.append("quadcoefs: \n" 
+				+ DoubleFmtUtil.fmtDouble3(quadForm.getQuadCoefs()) 
+				+ "linCoefs: " + DoubleFmtUtil.fmtDouble3(quadForm.getLinCoefs())
+				+ "\nconstCoef:" + DoubleFmtUtil.fmtDouble3(quadForm.getConstCoef()));
+	}
+
+	public static String fmtDouble3(CosSinPolynom2 p) {
+    	StringBuilder sb = new StringBuilder();
+    	fmtDouble3(sb, p);
+    	return sb.toString();
+    }
+
+	public static void fmtDouble3(StringBuilder sb, CosSinPolynom2 p) {
+    	sb.append("cc:" + fmtDouble3(p.getCoefCos2())
+    			+ " cs:" + fmtDouble3(p.getCoefCosSin())
+    			+ " ss:" + fmtDouble3(p.getCoefSin2())
+    			+ " c:" + fmtDouble3(p.getCoefCos())
+    			+ " s:" + fmtDouble3(p.getCoefSin())
+    			+ " k:" + fmtDouble3(p.getCoefConst()));
+    }
+
 }

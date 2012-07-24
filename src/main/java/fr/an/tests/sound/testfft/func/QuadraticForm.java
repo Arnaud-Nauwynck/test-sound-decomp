@@ -1,8 +1,10 @@
-package fr.an.tests.sound.testfft;
+package fr.an.tests.sound.testfft.func;
 
 import org.ejml.alg.dense.linsol.LinearSolver;
 import org.ejml.alg.dense.linsol.LinearSolverFactory;
 import org.ejml.data.DenseMatrix64F;
+
+import fr.an.tests.sound.testfft.utils.DoubleFmtUtil;
 
 public class QuadraticForm {
 	
@@ -19,6 +21,20 @@ public class QuadraticForm {
 		this.quadCoefs = new DenseMatrix64F(dim, dim);
 		this.linCoefs = new DenseMatrix64F(dim, 1);
 		
+	}
+
+	// ------------------------------------------------------------------------
+
+	public DenseMatrix64F getQuadCoefs() {
+		return quadCoefs;
+	}
+
+	public DenseMatrix64F getLinCoefs() {
+		return linCoefs;
+	}
+
+	public double getConstCoef() {
+		return constCoef;
 	}
 
 	public void setQuadCoefs(int row, int col, double data) {
