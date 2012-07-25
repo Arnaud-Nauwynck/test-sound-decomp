@@ -64,7 +64,20 @@ public class PHCoefEntry {
 	public int getSubHarmonicCount() {
 		return kCount;
 	}
-	
+
+	public int getSubHarmonicCountNonNulls() {
+		int res = 0;
+		for (int k = 2; k < kCount; k++) {
+			int indexPk = 7+3*(k-2);
+			if (Math.abs(p[indexPk]) < 1e-2 // relative to a[1]
+					&&  Math.abs(p[indexPk+1]) < 1e-4) {
+				res = k-1;
+				break;
+			}
+		}
+		return res;
+	}
+
 	public int getPLen() {
 		return p.length;
 	}

@@ -28,9 +28,9 @@ public class PHCoefFragmentAnalysis {
 	private static boolean adjustOmegaHeuristicNeighboor = false;
 	
 	private static boolean adjustOmegaWithSteps = true;
-	private static int adjustOmegaStepsCount = 5;
+	private static int adjustOmegaStepsCount = 6;
 	private static int adjustOmegaStepsRecurseCount = 4;
-	private static int computeFourierSubHarmonicCoefs = 0; // 7;  //TODO
+	private static int computeFourierSubHarmonicCoefs = 0; // 6;  //TODO
 
 	private static boolean adjustOmegaPhi = false;
 
@@ -448,8 +448,11 @@ public class PHCoefFragmentAnalysis {
 		int truncateLastPHSubHarmonicCount = 0;
 		for (int ph = 0; ph < tmpmaxPHCount; ph++) {
 			PHCoefEntry e = sortedCoefEntries[ph];
-			int eHCount = e.getSubHarmonicCount();
+
+			int eHCount = e.getSubHarmonicCountNonNulls();
+			// TODO.... solve on sub harmonic... use  
 			tmpHarmonicCount += eHCount;
+			
 			if (tmpHarmonicCount >= harmonicCount) {
 				truncateLastPHSubHarmonicCount = tmpHarmonicCount - harmonicCount;
 				maxPHCount = ph + 1;

@@ -26,10 +26,10 @@ public class ReadFileMain {
 //			"myriam-singing-in-the-rain.wav",
 			// missing... "fl-do-gr.wav",
 //			"fl-re-gr.wav",
-//			"fl-mi-gr.wav",
+			"fl-mi-gr.wav",
 //			"fl-fa-gr.wav",
 //			"fl-sol-gr.wav",
-//			"fl-la-gr.wav",
+			"fl-la-gr.wav",
 //			"fl-si-gr.wav",
 //
 //			"fl-do.wav",
