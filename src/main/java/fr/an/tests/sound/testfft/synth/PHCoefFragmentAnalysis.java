@@ -30,6 +30,7 @@ public class PHCoefFragmentAnalysis {
 	private static boolean adjustOmegaWithSteps = true;
 	private static int adjustOmegaStepsCount = 5;
 	private static int adjustOmegaStepsRecurseCount = 4;
+	private static int computeFourierSubHarmonicCoefs = 0; // 7;  //TODO
 
 	private static boolean adjustOmegaPhi = false;
 
@@ -88,6 +89,10 @@ public class PHCoefFragmentAnalysis {
 		
 		QuadraticForm quad_p0p3p5 = new QuadraticForm(3);
 		DenseMatrix64F solved_p0p3p5 = new DenseMatrix64F(3, 1);
+		
+		double[] fourierSubHarmonicCoefs = (computeFourierSubHarmonicCoefs > 1)? new double[computeFourierSubHarmonicCoefs] : null;
+
+		
 		
 		if (debugPrinter != null) {
 			debugPrinter.print("init: set curr residu = data");
@@ -325,6 +330,21 @@ public class PHCoefFragmentAnalysis {
 			}
 			currCoefEntry.setInitGuess(fftc0_a0, fftc0_w, fftc0_phi);
 
+			if (computeFourierSubHarmonicCoefs > 1) {
+				FFTQuadFormUtils.computeFourierNSubHarmonicCoefs(startTime, endTime, fragmentLen, 
+						residualData,
+						fftc0_w, fftc0_phi,
+						fourierSubHarmonicCoefs);
+
+				if (debugPrinter != null) {
+					debugPrinter.println("eval Fourier sub-harmonic coefs: " 
+							+ ", " + DoubleFmtUtil.fmtDouble3(fourierSubHarmonicCoefs));
+				}
+				
+				currCoefEntry.setInitGuessSubHarmonicCoefs(fourierSubHarmonicCoefs);
+			}
+				
+			
 			boolean usep7p12 = false;
 			if (usep7p12) {
 				double initguess_p7 = 0.0; 
@@ -352,8 +372,6 @@ public class PHCoefFragmentAnalysis {
 				}
 			}
 			
-			// *** The Biggy ***
-			// TODO ... iterate for solving pertubation params...
 			
 			currCoefEntry.expandVarValues_Quadratic_p0p3p5(startTime, endTime, fragmentLen, 
 					residualData,
@@ -423,14 +441,39 @@ public class PHCoefFragmentAnalysis {
 		double t = startTime;
 		double ht = 0.0;
 		int hi = 0;
-		int maxHarmonicCount = Math.min(harmonicCount, sortedCoefEntries.length);
-		IntermediateTParams it = new IntermediateTParams();
+		
+		int tmpmaxPHCount = Math.min(harmonicCount, sortedCoefEntries.length);
+		int maxPHCount = tmpmaxPHCount;
+		int tmpHarmonicCount = 0;
+		int truncateLastPHSubHarmonicCount = 0;
+		for (int ph = 0; ph < tmpmaxPHCount; ph++) {
+			PHCoefEntry e = sortedCoefEntries[ph];
+			int eHCount = e.getSubHarmonicCount();
+			tmpHarmonicCount += eHCount;
+			if (tmpHarmonicCount >= harmonicCount) {
+				truncateLastPHSubHarmonicCount = tmpHarmonicCount - harmonicCount;
+				maxPHCount = ph + 1;
+				break;
+			}
+		}
+		IntermediateTParams[] it_ph = new IntermediateTParams[maxPHCount];
+		for (int ph = 0; ph < maxPHCount; ph++) {
+			PHCoefEntry e = sortedCoefEntries[ph];
+			int eHCount = e.getSubHarmonicCount();
+			it_ph[ph] = new IntermediateTParams(eHCount);
+		}
+		
 		for (int i = resultStartIndex; i < resultEndIndex; i++) {
 			double tmpapprox = 0;
-			for (int k = 0; k < maxHarmonicCount; k++) {
-				PHCoefEntry e = sortedCoefEntries[k];
-				e.precomputeForT(it, t, ht);
-				tmpapprox += e.computeValue(t, ht);
+			for (int ph = 0; ph < maxPHCount; ph++) {
+				PHCoefEntry e = sortedCoefEntries[ph];
+				e.precomputeForT(it_ph[ph], t, ht);
+				if (ph + 1 == maxPHCount) {
+					// TODO... truncate last harmonics params for last ph only
+					
+				}
+				
+				tmpapprox += e.computeValue(t, it_ph[ph]);
 			}
 			resultData[i] = tmpapprox;
 			

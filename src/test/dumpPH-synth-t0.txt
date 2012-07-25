@@ -1,0 +1,194 @@
+dumpPH
+init: set curr residu = dataresidu var0:1024.978947278683
+step PH coef[0], SFFT on curr residu => sort 1st harmonic:[113] omega:2773.437 freq:441.406 Hz c,s:0.341	-0.725 		 N,phi: 0.801	-0.36*pi	 cumulSquare:0.642
+expand dphi using cos,sin polynom2: cc:657.269 cs:-0 ss:657.269 c:-1314.537 s:-0 k:1024.979
+adjust dphi using cos,sin polynom2:-0.36*pi prev var:367.71 => -0.36*pi expected var:367.71 var:367.71
+solve min for 441.406 Hz +/- 5*1.758 Hz ... expected var: 1122.872
+solve min for 439.648 Hz +/- 5*0.352 Hz ... expected var: 62.346
+solve min for 440 Hz +/- 5*0.07 Hz ... expected var: 40.523
+solve min for 440 Hz +/- 5*0.014 Hz ... expected var: 40.523
+solved omega with N steps wO-1,w0+1 ... foreach omega, phi=argmin var => w:440 Hz phi:0*pi ... expected var:40.523
+PH coef: set init guess p0,p1,p2: 0.801, 440 Hz, 0*pi
+compute quad form for p0,p3,p5
+quadcoefs: 
+1024.979 512.478 341.812
+512.478 341.812 256.479
+341.812 256.479 205.279
+linCoefs: -0 -0 -0
+constCoef:0
+solve quad min (pseudo inverse) => p0,p3,p5:0 -0 0, expected residu var:0
+end step PH coef[0], residu var=1024.9789472786604
+
+step PH coef[1], SFFT on curr residu => sort 1st harmonic:[113] omega:2773.437 freq:441.406 Hz c,s:0.341	-0.725 		 N,phi: 0.801	-0.36*pi	 cumulSquare:0.642
+expand dphi using cos,sin polynom2: cc:657.269 cs:-0 ss:657.269 c:-1314.537 s:-0 k:1024.979
+adjust dphi using cos,sin polynom2:-0.36*pi prev var:367.71 => -0.36*pi expected var:367.71 var:367.71
+solve min for 441.406 Hz +/- 5*1.758 Hz ... expected var: 1122.872
+solve min for 439.648 Hz +/- 5*0.352 Hz ... expected var: 62.346
+solve min for 440 Hz +/- 5*0.07 Hz ... expected var: 40.523
+solve min for 440 Hz +/- 5*0.014 Hz ... expected var: 40.523
+solved omega with N steps wO-1,w0+1 ... foreach omega, phi=argmin var => w:440 Hz phi:0*pi ... expected var:40.523
+PH coef: set init guess p0,p1,p2: 0.801, 440 Hz, 0*pi
+compute quad form for p0,p3,p5
+quadcoefs: 
+1024.979 512.478 341.812
+512.478 341.812 256.479
+341.812 256.479 205.279
+linCoefs: -0 -0 0
+constCoef:0
+solve quad min (pseudo inverse) => p0,p3,p5:0 0 -0, expected residu var:0
+end step PH coef[1], residu var=1024.9789472786597
+
+step PH coef[2], SFFT on curr residu => sort 1st harmonic:[113] omega:2773.437 freq:441.406 Hz c,s:0.341	-0.725 		 N,phi: 0.801	-0.36*pi	 cumulSquare:0.642
+expand dphi using cos,sin polynom2: cc:657.269 cs:-0 ss:657.269 c:-1314.537 s:-0 k:1024.979
+adjust dphi using cos,sin polynom2:-0.36*pi prev var:367.71 => -0.36*pi expected var:367.71 var:367.71
+solve min for 441.406 Hz +/- 5*1.758 Hz ... expected var: 1122.872
+solve min for 439.648 Hz +/- 5*0.352 Hz ... expected var: 62.346
+solve min for 440 Hz +/- 5*0.07 Hz ... expected var: 40.523
+solve min for 440 Hz +/- 5*0.014 Hz ... expected var: 40.523
+solved omega with N steps wO-1,w0+1 ... foreach omega, phi=argmin var => w:440 Hz phi:0*pi ... expected var:40.523
+PH coef: set init guess p0,p1,p2: 0.801, 440 Hz, 0*pi
+compute quad form for p0,p3,p5
+quadcoefs: 
+1024.979 512.478 341.812
+512.478 341.812 256.479
+341.812 256.479 205.279
+linCoefs: 0 -0 -0
+constCoef:0
+solve quad min (pseudo inverse) => p0,p3,p5:0 -0 0, expected residu var:0
+end step PH coef[2], residu var=1024.9789472786597
+
+step PH coef[3], SFFT on curr residu => sort 1st harmonic:[113] omega:2773.437 freq:441.406 Hz c,s:0.341	-0.725 		 N,phi: 0.801	-0.36*pi	 cumulSquare:0.642
+expand dphi using cos,sin polynom2: cc:657.269 cs:-0 ss:657.269 c:-1314.537 s:-0 k:1024.979
+adjust dphi using cos,sin polynom2:-0.36*pi prev var:367.71 => -0.36*pi expected var:367.71 var:367.71
+solve min for 441.406 Hz +/- 5*1.758 Hz ... expected var: 1122.872
+solve min for 439.648 Hz +/- 5*0.352 Hz ... expected var: 62.346
+solve min for 440 Hz +/- 5*0.07 Hz ... expected var: 40.523
+solve min for 440 Hz +/- 5*0.014 Hz ... expected var: 40.523
+solved omega with N steps wO-1,w0+1 ... foreach omega, phi=argmin var => w:440 Hz phi:0*pi ... expected var:40.523
+PH coef: set init guess p0,p1,p2: 0.801, 440 Hz, 0*pi
+compute quad form for p0,p3,p5
+quadcoefs: 
+1024.979 512.478 341.812
+512.478 341.812 256.479
+341.812 256.479 205.279
+linCoefs: 0 -0 -0
+constCoef:0
+solve quad min (pseudo inverse) => p0,p3,p5:0 -0 0, expected residu var:0
+end step PH coef[3], residu var=1024.9789472786597
+
+step PH coef[4], SFFT on curr residu => sort 1st harmonic:[113] omega:2773.437 freq:441.406 Hz c,s:0.341	-0.725 		 N,phi: 0.801	-0.36*pi	 cumulSquare:0.642
+expand dphi using cos,sin polynom2: cc:657.269 cs:-0 ss:657.269 c:-1314.537 s:-0 k:1024.979
+adjust dphi using cos,sin polynom2:-0.36*pi prev var:367.71 => -0.36*pi expected var:367.71 var:367.71
+solve min for 441.406 Hz +/- 5*1.758 Hz ... expected var: 1122.872
+solve min for 439.648 Hz +/- 5*0.352 Hz ... expected var: 62.346
+solve min for 440 Hz +/- 5*0.07 Hz ... expected var: 40.523
+solve min for 440 Hz +/- 5*0.014 Hz ... expected var: 40.523
+solved omega with N steps wO-1,w0+1 ... foreach omega, phi=argmin var => w:440 Hz phi:0*pi ... expected var:40.523
+PH coef: set init guess p0,p1,p2: 0.801, 440 Hz, 0*pi
+compute quad form for p0,p3,p5
+quadcoefs: 
+1024.979 512.478 341.812
+512.478 341.812 256.479
+341.812 256.479 205.279
+linCoefs: 0 -0 -0
+constCoef:0
+solve quad min (pseudo inverse) => p0,p3,p5:0 -0 0, expected residu var:0
+end step PH coef[4], residu var=1024.9789472786597
+
+step PH coef[5], SFFT on curr residu => sort 1st harmonic:[113] omega:2773.437 freq:441.406 Hz c,s:0.341	-0.725 		 N,phi: 0.801	-0.36*pi	 cumulSquare:0.642
+expand dphi using cos,sin polynom2: cc:657.269 cs:-0 ss:657.269 c:-1314.537 s:-0 k:1024.979
+adjust dphi using cos,sin polynom2:-0.36*pi prev var:367.71 => -0.36*pi expected var:367.71 var:367.71
+solve min for 441.406 Hz +/- 5*1.758 Hz ... expected var: 1122.872
+solve min for 439.648 Hz +/- 5*0.352 Hz ... expected var: 62.346
+solve min for 440 Hz +/- 5*0.07 Hz ... expected var: 40.523
+solve min for 440 Hz +/- 5*0.014 Hz ... expected var: 40.523
+solved omega with N steps wO-1,w0+1 ... foreach omega, phi=argmin var => w:440 Hz phi:0*pi ... expected var:40.523
+PH coef: set init guess p0,p1,p2: 0.801, 440 Hz, 0*pi
+compute quad form for p0,p3,p5
+quadcoefs: 
+1024.979 512.478 341.812
+512.478 341.812 256.479
+341.812 256.479 205.279
+linCoefs: 0 -0 -0
+constCoef:0
+solve quad min (pseudo inverse) => p0,p3,p5:0 -0 0, expected residu var:0
+end step PH coef[5], residu var=1024.9789472786597
+
+step PH coef[6], SFFT on curr residu => sort 1st harmonic:[113] omega:2773.437 freq:441.406 Hz c,s:0.341	-0.725 		 N,phi: 0.801	-0.36*pi	 cumulSquare:0.642
+expand dphi using cos,sin polynom2: cc:657.269 cs:-0 ss:657.269 c:-1314.537 s:-0 k:1024.979
+adjust dphi using cos,sin polynom2:-0.36*pi prev var:367.71 => -0.36*pi expected var:367.71 var:367.71
+solve min for 441.406 Hz +/- 5*1.758 Hz ... expected var: 1122.872
+solve min for 439.648 Hz +/- 5*0.352 Hz ... expected var: 62.346
+solve min for 440 Hz +/- 5*0.07 Hz ... expected var: 40.523
+solve min for 440 Hz +/- 5*0.014 Hz ... expected var: 40.523
+solved omega with N steps wO-1,w0+1 ... foreach omega, phi=argmin var => w:440 Hz phi:0*pi ... expected var:40.523
+PH coef: set init guess p0,p1,p2: 0.801, 440 Hz, 0*pi
+compute quad form for p0,p3,p5
+quadcoefs: 
+1024.979 512.478 341.812
+512.478 341.812 256.479
+341.812 256.479 205.279
+linCoefs: 0 -0 -0
+constCoef:0
+solve quad min (pseudo inverse) => p0,p3,p5:0 -0 0, expected residu var:0
+end step PH coef[6], residu var=1024.9789472786597
+
+step PH coef[7], SFFT on curr residu => sort 1st harmonic:[113] omega:2773.437 freq:441.406 Hz c,s:0.341	-0.725 		 N,phi: 0.801	-0.36*pi	 cumulSquare:0.642
+expand dphi using cos,sin polynom2: cc:657.269 cs:-0 ss:657.269 c:-1314.537 s:-0 k:1024.979
+adjust dphi using cos,sin polynom2:-0.36*pi prev var:367.71 => -0.36*pi expected var:367.71 var:367.71
+solve min for 441.406 Hz +/- 5*1.758 Hz ... expected var: 1122.872
+solve min for 439.648 Hz +/- 5*0.352 Hz ... expected var: 62.346
+solve min for 440 Hz +/- 5*0.07 Hz ... expected var: 40.523
+solve min for 440 Hz +/- 5*0.014 Hz ... expected var: 40.523
+solved omega with N steps wO-1,w0+1 ... foreach omega, phi=argmin var => w:440 Hz phi:0*pi ... expected var:40.523
+PH coef: set init guess p0,p1,p2: 0.801, 440 Hz, 0*pi
+compute quad form for p0,p3,p5
+quadcoefs: 
+1024.979 512.478 341.812
+512.478 341.812 256.479
+341.812 256.479 205.279
+linCoefs: 0 -0 -0
+constCoef:0
+solve quad min (pseudo inverse) => p0,p3,p5:0 -0 0, expected residu var:0
+end step PH coef[7], residu var=1024.9789472786597
+
+step PH coef[8], SFFT on curr residu => sort 1st harmonic:[113] omega:2773.437 freq:441.406 Hz c,s:0.341	-0.725 		 N,phi: 0.801	-0.36*pi	 cumulSquare:0.642
+expand dphi using cos,sin polynom2: cc:657.269 cs:-0 ss:657.269 c:-1314.537 s:-0 k:1024.979
+adjust dphi using cos,sin polynom2:-0.36*pi prev var:367.71 => -0.36*pi expected var:367.71 var:367.71
+solve min for 441.406 Hz +/- 5*1.758 Hz ... expected var: 1122.872
+solve min for 439.648 Hz +/- 5*0.352 Hz ... expected var: 62.346
+solve min for 440 Hz +/- 5*0.07 Hz ... expected var: 40.523
+solve min for 440 Hz +/- 5*0.014 Hz ... expected var: 40.523
+solved omega with N steps wO-1,w0+1 ... foreach omega, phi=argmin var => w:440 Hz phi:0*pi ... expected var:40.523
+PH coef: set init guess p0,p1,p2: 0.801, 440 Hz, 0*pi
+compute quad form for p0,p3,p5
+quadcoefs: 
+1024.979 512.478 341.812
+512.478 341.812 256.479
+341.812 256.479 205.279
+linCoefs: 0 -0 -0
+constCoef:0
+solve quad min (pseudo inverse) => p0,p3,p5:0 -0 0, expected residu var:0
+end step PH coef[8], residu var=1024.9789472786597
+
+step PH coef[9], SFFT on curr residu => sort 1st harmonic:[113] omega:2773.437 freq:441.406 Hz c,s:0.341	-0.725 		 N,phi: 0.801	-0.36*pi	 cumulSquare:0.642
+expand dphi using cos,sin polynom2: cc:657.269 cs:-0 ss:657.269 c:-1314.537 s:-0 k:1024.979
+adjust dphi using cos,sin polynom2:-0.36*pi prev var:367.71 => -0.36*pi expected var:367.71 var:367.71
+solve min for 441.406 Hz +/- 5*1.758 Hz ... expected var: 1122.872
+solve min for 439.648 Hz +/- 5*0.352 Hz ... expected var: 62.346
+solve min for 440 Hz +/- 5*0.07 Hz ... expected var: 40.523
+solve min for 440 Hz +/- 5*0.014 Hz ... expected var: 40.523
+solved omega with N steps wO-1,w0+1 ... foreach omega, phi=argmin var => w:440 Hz phi:0*pi ... expected var:40.523
+PH coef: set init guess p0,p1,p2: 0.801, 440 Hz, 0*pi
+compute quad form for p0,p3,p5
+quadcoefs: 
+1024.979 512.478 341.812
+512.478 341.812 256.479
+341.812 256.479 205.279
+linCoefs: 0 -0 -0
+constCoef:0
+solve quad min (pseudo inverse) => p0,p3,p5:0 -0 0, expected residu var:0
+end step PH coef[9], residu var=1024.9789472786597
+
+
+

@@ -6,19 +6,21 @@ import fr.an.tests.sound.testfft.func.QuadraticForm;
 
 /**
  * coefficient for a pseudo (perturbated) harmonic, with 2 sub-harmonics
- * <code>a0 sin( w0.t + phi0 ) + a1 sin(2.w0.t + phi1 ) + a2 sin(3.w0.t + phi2 )</code>
+ * <code>a1 sin( w0.t + phi0 ) + a2 sin(2.w0.t + phi2 ) + a3 sin(3.w0.t + phi3 )</code>
  * where a0, w0 are quadratic form on t!
  */
 public class PHCoefEntry {
 
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	
-	public static final int MAX_P_LEN = 13;
 	
 //	private double t0;
-	private double[] p = new double[MAX_P_LEN];
+	private double[] p;
 
 	private double residualVar;
+	
+	private int kCount = 5;
+	
 	
 	public static class IntermediateTParams {
 		double[] p;
@@ -28,21 +30,47 @@ public class PHCoefEntry {
 		/** homogeneous-time in [0.0, 1.0]  = (t - startTime) / (endTime - startTime) */
 		double ht;
 		
-		double a0, w0, phi0, w0tp0, cos_w0tp0, sin_w0tp0;
-		double a1, w1, phi1, w1tp1, cos_w1tp1, sin_w1tp1;
-		double a2, w2, phi2, w2tp2, cos_w2tp2, sin_w2tp2;
+		int kCount;
+		double w0;
+		double phi0;
+		double[] ak;
+		double[] cos_kwtp;
+		double[] sin_kwtp;
+		
+		public IntermediateTParams(int kCount) {
+			super();
+			this.kCount = kCount;
+			this.ak = new double[kCount];
+			this.cos_kwtp = new double[kCount];
+			this.sin_kwtp = new double[kCount];
+		}
+
+		public int getSubHarmonicCount() {
+			return kCount;
+		}
+		
+		
 	}
 	
 	// ------------------------------------------------------------------------
 
 	public PHCoefEntry() {
+		this.kCount = 5;
+		this.p = new double[7 + 3*(kCount-1)];
 	}
 	
 	// ------------------------------------------------------------------------
 
-
+	public int getSubHarmonicCount() {
+		return kCount;
+	}
+	
+	public int getPLen() {
+		return p.length;
+	}
+	
 	public void setInitGuess(double fftc0_a0, double fftc0_w, double fftc0_phi) {
-		for (int i = 0; i < MAX_P_LEN; i++) {
+		for (int i = 0; i < p.length; i++) {
 			p[i] = 0.0;
 		}
 		p[0] = fftc0_a0;
@@ -57,6 +85,14 @@ public class PHCoefEntry {
 		p[10] = initguess_p10;
 		p[12] = initguess_p12;
 	}
+	
+	public void setInitGuessSubHarmonicCoefs(double[] fourierSubHarmonicCoefs) {
+		for (int k = 2; k < kCount; k++) {
+			int indexPk = 7+3*(k-2);
+			p[indexPk] = fourierSubHarmonicCoefs[k];
+		}
+	}
+
 	
 	public double[] getP() {
 		return p;
@@ -75,7 +111,7 @@ public class PHCoefEntry {
 	}
 
 	public void computeValues(double startTime, double endTime, int timeLen, double[] times, double[] res) {
-		IntermediateTParams itparams = new IntermediateTParams();
+		IntermediateTParams itparams = new IntermediateTParams(kCount);
 		final double dt = (endTime - startTime) / timeLen;
 		final double dht = 1.0 / timeLen;
 		double t = startTime;
@@ -91,7 +127,7 @@ public class PHCoefEntry {
 
 	public double computeVarValues(double startTime, double endTime, int timeLen, double[] times, double[] origData) {
 		double varRes = 0.0;
-		IntermediateTParams itparams = new IntermediateTParams();
+		IntermediateTParams itparams = new IntermediateTParams(kCount);
 		final double dt = (endTime - startTime) / timeLen;
 		final double dht = 1.0 / timeLen;
 		double t = startTime;
@@ -111,7 +147,7 @@ public class PHCoefEntry {
 	public double computeResidualValues(double startTime, double endTime, int timeLen, 
 			double[] resultResidu, double[] origData) {
 		double varRes = 0.0;
-		IntermediateTParams itparams = new IntermediateTParams();
+		IntermediateTParams itparams = new IntermediateTParams(kCount);
 		final double dt = (endTime - startTime) / timeLen;
 		final double dht = 1.0 / timeLen;
 		double absoluteT = startTime;
@@ -130,16 +166,17 @@ public class PHCoefEntry {
 	}
 
 	public double computeValue(double t, double ht) {
-		IntermediateTParams it = new IntermediateTParams();
+		IntermediateTParams it = new IntermediateTParams(kCount);
 		precomputeForT(it, t, ht);
 		double res = computeValue(t, it);
 		return res;
 	}
 	
 	public double computeValue(double t, IntermediateTParams it) {
-		double res = it.a0 * it.cos_w0tp0 
-					+ it.a1 * it.cos_w1tp1 
-					+ it.a2 * it.cos_w2tp2;
+		double res = 0.0;
+		for (int k = 1; k < it.kCount; k++) {
+			res += it.ak[k] * it.cos_kwtp[k];
+		}
 		return res;
 	}
 	
@@ -147,27 +184,22 @@ public class PHCoefEntry {
 		it.p = p;
 		it.absoluteT = absoluteT;
 		it.ht = ht;
+
+		it.w0    = p[1] + ht * (p[4] + ht * p[6]);
+		it.phi0  = p[2];
+
+		it.ak[1] = p[0] + ht * (p[3] + ht * p[5]);
+		double wtp = it.w0 * absoluteT + it.phi0;
+		it.cos_kwtp[1] = Math.cos(wtp);
+		it.sin_kwtp[1] = Math.sin(wtp);
 		
-		it.a0 = p[0] + ht * (p[3] + ht * p[5]);
-		it.w0 = p[1] + ht * (p[4] + ht * p[6]);
-		it.phi0 = p[2];
-		it.w0tp0 = it.w0 * absoluteT + it.phi0;
-		it.cos_w0tp0 = Math.cos(it.w0tp0);
-		it.sin_w0tp0 = Math.sin(it.w0tp0);
-
-		it.a1 = p[7] * it.a0 + p[8];
-		it.w1 = 2 * it.w0;
-		it.phi1 = it.phi0 + p[9];
-		it.w1tp1 = it.w1 * absoluteT + it.phi1;
-		it.cos_w1tp1 = Math.cos(it.w1tp1);
-		it.sin_w1tp1 = Math.sin(it.w1tp1);
-
-		it.a2 = p[10] * it.a0 + p[11];
-		it.w2 = 3 * it.w0;
-		it.phi2 = it.phi0 + p[12];
-		it.w2tp2 = it.w2 * absoluteT + it.phi2;
-		it.cos_w2tp2 = Math.cos(it.w2tp2);
-		it.sin_w2tp2 = Math.sin(it.w2tp2);
+		for (int k = 2; k < it.kCount; k++) {
+			int indexPk = 7+3*(k-2);
+			it.ak[k] = it.ak[1] * p[indexPk] + p[indexPk+1];
+			double kwtp = k * it.w0 * absoluteT + it.phi0 + p[indexPk+2];
+			it.cos_kwtp[k] = Math.cos(kwtp);
+			it.sin_kwtp[k] = Math.sin(kwtp);
+		}
 	}
 
 
@@ -175,8 +207,7 @@ public class PHCoefEntry {
 			double startTime, double endTime, int dataLen,  
 			double[] data, 
 			QuadraticForm result_quad) {
-		IntermediateTParams it = new IntermediateTParams();
-		
+		IntermediateTParams it = new IntermediateTParams(kCount);
 
 		double tmpres_quad00 = 0.0;
 		double tmpres_quad01 = 0.0;
@@ -201,38 +232,55 @@ public class PHCoefEntry {
 			precomputeForT(it, absoluteT, ht);
 			
 			// double value = computeValue(times[i], itparams);
-			// value = (p0 + p3.ht + p5.ht^2) * it.cos_w0tp0 
-			//       + ((p0 + p3.ht + p5.ht^2) * p7  + p8 ) * it.cos_w1tp1 
-			//		 + ((p0 + p3.ht + p5.ht^2) * p10 + p11) * it.cos_w2tp2;
+			// value = ((p0 + p3.ht + p5.ht^2)            ) * it.cos_1wtp 
+			//       + ((p0 + p3.ht + p5.ht^2) * p7  + p8 ) * it.cos_2wtp 
+			//		 + ((p0 + p3.ht + p5.ht^2) * p10 + p11) * it.cos_3wtp
+			//		 + ((p0 + p3.ht + p5.ht^2) * p13 + p14) * it.cos_4wtp
+			//		 + ((p0 + p3.ht + p5.ht^2) * p16 + p17) * it.cos_5wtp
 			
-			// => value = p0 * c0 + p3 * c3 + p5 * c5 + k 
-			double c0 = it.cos_w0tp0
-						+ p[7] * it.cos_w1tp1 
-						+ p[10] * it.cos_w2tp2;
-			double c3 = ht * ( 
-					  it.cos_w0tp0
-					+ p[7] * it.cos_w1tp1 
-					+ p[10] * it.cos_w2tp2);
-			double c5 = ht * ht * (
-					  it.cos_w0tp0
-					+ p[7] * it.cos_w1tp1 
-					+ p[10] * it.cos_w2tp2);
-			double k = p[8]  * it.cos_w1tp1
-					+ p[11] * it.cos_w2tp2;
+			// => value = p0 * c0 + p3 * c3 + p5 * c5 + cconst 
+			
+//			double check_c0 =   it.cos_kwtp[1]
+//						+ p[7]  * it.cos_kwtp[2] 
+//						+ p[10] * it.cos_kwtp[3]
+//						+ p[13] * it.cos_kwtp[4];
+//			double check_c3 = ht * ( 
+//					          it.cos_kwtp[1]
+//					+ p[7]  * it.cos_kwtp[2] 
+//					+ p[10] * it.cos_kwtp[3]
+//					+ p[13] * it.cos_kwtp[4] );
+//					// = ht * c0; 			
+//			double check_c5 = ht * ht * check_c0;
+//			double check_cconst = p[8] * it.cos_kwtp[2]
+//					+ p[11] * it.cos_kwtp[3]
+//					+ p[14] * it.cos_kwtp[4];
 
+			double sum_alin_coskwtp = it.cos_kwtp[1];
+			double sum_const_coskwtp = 0;		
+			for (int k = 2; k < kCount; k++) {
+				int indexPK = 7+3*(k-2);
+				sum_alin_coskwtp  += p[indexPK] * it.cos_kwtp[k];
+				sum_const_coskwtp += p[indexPK+1] * it.cos_kwtp[k];
+			}
+
+			final double c0 = sum_alin_coskwtp;
+			final double c3 = ht * c0;
+			final double c5 = ht * ht * c0;
+			final double cconst = sum_const_coskwtp;
+			
 			double value = 0.0;
 			if (DEBUG && doCheck) {
-				double checkValue = p[0] * c0 + p[3] * c3 + p[5] * c5 + k;
+				double checkValue = p[0] * c0 + p[3] * c3 + p[5] * c5 + cconst;
 				value = computeValue(absoluteT, it);
 				if (Math.abs(value - checkValue) > 1e-3) {
 					System.err.println("should not occur: checkValue != value ...");
-				}
+				} 
 			}
 			// err = data - value  
 			//     = (data - (p0 * c0 + p3 * c3 + p5 * c5 + k))
 			//     = (d - (p0 * c0 + p3 * c3 + p5 * c5 ))
 			// ...where d=data-k
-			double d = data[i] - k;
+			double d = data[i] - cconst;
 					
 			// err^2 =  (d - (p0 * c0 + p3 * c3 + p5 * c5)) ^2
 			//       = p0^2 * (c0^2) + p3^2 * c3^2 + p5^2 * c5^2

@@ -193,4 +193,50 @@ public class FFTQuadFormUtils {
 		return res;
 	}
 	
+	
+	/**
+	 * given a non-integer frequency <code>omega0</code> and phase <code>phi0</code>,
+	 * compute <code>N</code> Fourier coefficients, for frequencies 1.w, 2.w, 3.w, ..N.w and SAME phase 
+	 */
+	public static void computeFourierNSubHarmonicCoefs(double startTime, double endTime, int dataLen,  
+			double[] data,
+			final double w0, final double phi0,
+			double[] resultFourierSubCoefs) {
+		final double dt = (endTime - startTime) / dataLen;
+		double absoluteT = startTime;
+		
+		final int K = resultFourierSubCoefs.length;
+		for (int i = 0; i < dataLen; i++) {
+			// r = data[i] - a.cos(omega.t + phi)
+			for (int k = 1; k < K; k++) {
+				double ck = data[i] * Math.cos(k * w0 * absoluteT + phi0);
+				resultFourierSubCoefs[k] += ck; 
+			}
+			// next
+			absoluteT += dt;
+		}
+	}
+	
+	
+	/**
+	 * given a non-integer frequency <code>omega0</code> and phase <code>phi0</code>,
+	 * compute Fourier coefficient
+	 * <code>c = sum_t c_t</code>  with <code>c_t = a.cos(w0.t + phi0)</code> 
+	 */
+	public static double computeFourierCoef(double startTime, double endTime, int dataLen,  
+			double[] data,
+			final double w0, final double phi0) {
+		final double dt = (endTime - startTime) / dataLen;
+		double absoluteT = startTime;
+		
+		double res = 0.0;
+		for (int i = 0; i < dataLen; i++) {
+			res += data[i] * Math.cos(w0 * absoluteT + phi0);
+			
+			// next
+			absoluteT += dt;
+		}
+		return res;
+	}
+	
 }

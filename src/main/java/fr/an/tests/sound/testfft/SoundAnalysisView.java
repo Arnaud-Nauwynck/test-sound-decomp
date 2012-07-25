@@ -1,7 +1,9 @@
 package fr.an.tests.sound.testfft;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
@@ -26,6 +28,7 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.ChartChangeEvent;
 import org.jfree.chart.event.ChartChangeListener;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.Range;
 import org.jfree.data.xy.DefaultXYDataset;
 
@@ -99,8 +102,10 @@ public class SoundAnalysisView {
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "approxPH", xData, approxDataPH);
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "residuPH", xData, residualDataPH);
 
+			
 			// JFreeChart
 	        this.mainChart = ChartFactory.createXYLineChart(model.getName(), "time", "amplitude", mainDataset, true);
+
 	        mainChart.addChangeListener(new ChartChangeListener() {
 				public void chartChanged(ChartChangeEvent event) {
 					onMainChartChanged(event);
@@ -225,6 +230,27 @@ public class SoundAnalysisView {
 			// JFreeChart
 			this.residualChart = ChartFactory.createXYLineChart(model.getName(), "time", "amplitude", residuDataset, true);
 	
+			XYPlot residualChartPlot = (XYPlot) residualChart.getPlot();
+			XYItemRenderer residualChartRenderer = residualChartPlot.getRenderer(0);
+					
+			XYPlot mainChartPlot = (XYPlot) mainChart.getPlot();
+//			XYItemRenderer mainChartRenderer = mainChartPlot.getRenderer();
+//
+//			XYItemRenderer mainChartFFTResidualRenderer = mainChartPlot.getRenderer(2);
+//			XYItemRenderer mainChartPHResidualRenderer = mainChartPlot.getRenderer(4);
+//			TODO null?!.. 			
+//			Paint mainResidualFFTPaint = mainChartRenderer.getSeriesPaint(2);
+//			Paint mainResidualPHPaint = mainChartRenderer.getSeriesPaint(4);
+//			residualFFTRenderer.setBasePaint(mainChartPlot.getRenderer(2).getBasePaint());
+//			residualPHRenderer.setBasePaint(mainChartPlot.getRenderer(4).getBasePaint());
+
+//			residualChartRenderer.setSeriesPaint(0, mainResidualFFTPaint);
+//			residualChartRenderer.setSeriesPaint(1, mainResidualPHPaint);
+
+			//?? hard-coded ..
+			residualChartRenderer.setSeriesPaint(0, Color.GREEN);
+			residualChartRenderer.setSeriesPaint(1, Color.MAGENTA);
+
 	        // JPanel panel = new JPanel();
 	        this.residualChartPanel = new ChartPanel(residualChart); 
 	
