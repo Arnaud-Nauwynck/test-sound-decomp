@@ -1,4 +1,4 @@
-package fr.an.tests.sound.testfft.sfft;
+package fr.an.tests.sound.testfft.algos.sfft;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -6,12 +6,15 @@ import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import fr.an.tests.sound.testfft.ResiduInfo;
+import fr.an.tests.sound.testfft.SoundFragmentAnalysisAlgo;
 import fr.an.tests.sound.testfft.SoundFragmentAnalysis;
+import fr.an.tests.sound.testfft.math.fft.FFT;
+import fr.an.tests.sound.testfft.math.func.FragmentDataTime;
 import fr.an.tests.sound.testfft.utils.DoubleFmtUtil;
+import fr.an.tests.sound.testfft.utils.ResiduInfo;
 
 
-public class FFTCoefFragmentAnalysis {
+public class FFTCoefFragmentAnalysisAlgo implements SoundFragmentAnalysisAlgo {
 
     private SoundFragmentAnalysis fragment;
 
@@ -28,7 +31,7 @@ public class FFTCoefFragmentAnalysis {
 	
 	// ------------------------------------------------------------------------
 	
-    public FFTCoefFragmentAnalysis(SoundFragmentAnalysis fragment, FFT fft) {
+    public FFTCoefFragmentAnalysisAlgo(SoundFragmentAnalysis fragment, FFT fft) {
     	this.fragment = fragment;
     	int fragmentLen = fragment.getFragmentLen();
     	this.fft = fft;
@@ -36,7 +39,7 @@ public class FFTCoefFragmentAnalysis {
     		this.fft = new FFT(fragmentLen, fragment.getModel().getFrameRate());
     	}
 		this.fftData = new double[fragmentLen];
-    	this.fftLen = fragment.getFragmentLen() / 2;
+    	this.fftLen = fragmentLen / 2;
     	coefEntries = FFTCoefEntry.newArray(fft, fftLen);
     	sortedCoefEntries = new FFTCoefEntry[fftLen];
     }
@@ -122,16 +125,19 @@ public class FFTCoefFragmentAnalysis {
 	}
 
 	public void getReconstructedMainHarmonics(final int harmonicCount, 
-			final int resultStartIndex, final int resultEndIndex, final double startTime, final double dt, 
-			double[] resultData, ResiduInfo residuInfo) {
-		double t = startTime;
-		for (int i = resultStartIndex; i < resultEndIndex; i++, t+=dt) {
+			FragmentDataTime fragDataTime, final int startIndexROI, final int endIndexROI,  
+			double[] resultData, final int resultStartIndex, 
+			ResiduInfo residuInfo) {
+		int resultIndex = resultStartIndex;
+		final double[] compactArray = fragDataTime.getCompactTimeData4Array();
+		for (int i = startIndexROI,compactIndex = 4*startIndexROI; i < endIndexROI; i++,compactIndex+=4,resultIndex++) {
 			double tmpapprox = 0;
+			double absoluteT = compactArray[compactIndex];
 			for (int k = 0; k < harmonicCount; k++) {
 				FFTCoefEntry e = sortedCoefEntries[k];
-				tmpapprox += e.getNorm() * Math.cos(e.getOmega() * t + e.getPhi());
+				tmpapprox += e.getNorm() * Math.cos(e.getOmega() * absoluteT + e.getPhi());
 			}
-			resultData[i] = tmpapprox;
+			resultData[resultIndex] = tmpapprox;
 		}
 
 		residuInfo.cumulSquareNormCoef = sortedCoefEntries[harmonicCount].getCumulatedSquareNorm();

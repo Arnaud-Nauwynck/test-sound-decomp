@@ -1,4 +1,4 @@
-package fr.an.tests.sound.testfft;
+package fr.an.tests.sound.testfft.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -32,14 +32,17 @@ import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.Range;
 import org.jfree.data.xy.DefaultXYDataset;
 
-import fr.an.tests.sound.testfft.sfft.FFTCoefEntry;
-import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis;
-import fr.an.tests.sound.testfft.synth.PHCoefFragmentAnalysis;
-import fr.an.tests.sound.testfft.utils.JFreeChartUtils;
+import fr.an.tests.sound.testfft.SoundAnalysis;
+import fr.an.tests.sound.testfft.SoundFragmentAnalysis;
+import fr.an.tests.sound.testfft.algos.ph.PHCoefFragmentAnalysisAlgo;
+import fr.an.tests.sound.testfft.algos.sfft.FFTCoefEntry;
+import fr.an.tests.sound.testfft.algos.sfft.FFTCoefFragmentAnalysisAlgo;
+import fr.an.tests.sound.testfft.ui.utils.JFreeChartUtils;
+import fr.an.tests.sound.testfft.utils.ResiduInfo;
 
 public class SoundAnalysisView {
 
-	private SoundAnalysisModel model;
+	private SoundAnalysis model;
 
 	private JTabbedPane tabbedPane;
 	
@@ -75,7 +78,7 @@ public class SoundAnalysisView {
 	
 	// ------------------------------------------------------------------------
 	
-	public SoundAnalysisView(SoundAnalysisModel model) {
+	public SoundAnalysisView(SoundAnalysis model) {
 		super();
 		this.model = model;
 	
@@ -130,7 +133,7 @@ public class SoundAnalysisView {
         	reconstPanel.add(dumpBut);
         	dumpBut.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					FFTCoefFragmentAnalysis fftFrag = findCurrPlotFFTFragment();
+					FFTCoefFragmentAnalysisAlgo fftFrag = findCurrPlotFFTFragment();
 					if (fftFrag == null) {
 						System.err.println("FFT frag not found");
 						return; // SHOULD NOT OCCUR
@@ -152,7 +155,7 @@ public class SoundAnalysisView {
         	reconstPanel.add(dumpPHBut);
         	dumpPHBut.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					PHCoefFragmentAnalysis phFrag = findCurrPlotPHFragment();
+					PHCoefFragmentAnalysisAlgo phFrag = findCurrPlotPHFragment();
 					if (phFrag == null) {
 						System.err.println("PH frag not found");
 						return; // SHOULD NOT OCCUR
@@ -302,18 +305,15 @@ public class SoundAnalysisView {
 		ResiduInfo residuInfoPH = new ResiduInfo();
 
 		int frameLength = model.getFrameLength();
-		double startTime = 0.0;
-		// double endTime = startTime + model.getFrameDuration();
-		double dt = 1.0 / model.getFrameRate();
 		
 		model.getReconstructedMainHarmonics(harmonicCount,
-				0, frameLength, startTime, dt,
+				0, frameLength, 
 				approxData,
 				residualData,
 				residuInfo);
 
 		model.getReconstructedMainHarmonicsPH(harmonicCount,
-				0, frameLength, startTime, dt, 
+				0, frameLength,  
 				approxDataPH,
 				residualDataPH,
 				residuInfoPH);
@@ -365,16 +365,16 @@ public class SoundAnalysisView {
 		return res;
 	}
 
-	private PHCoefFragmentAnalysis findCurrPlotPHFragment() {
-		int timeIndex = getCurrPlotMidTimeIndex();
-		PHCoefFragmentAnalysis res = model.findPHFragmentAtIndex(timeIndex);
+	private PHCoefFragmentAnalysisAlgo findCurrPlotPHFragment() {
+		double time = getCurrPlotMidTime();
+		PHCoefFragmentAnalysisAlgo res = model.findPHFragmentROIAtTime(time);
 		return res;
 	}
 
 
-	private FFTCoefFragmentAnalysis findCurrPlotFFTFragment() {
-		int timeIndex = getCurrPlotMidTimeIndex();
-		FFTCoefFragmentAnalysis res = model.findFFTFragmentAtIndex(timeIndex);
+	private FFTCoefFragmentAnalysisAlgo findCurrPlotFFTFragment() {
+		double time = getCurrPlotMidTime();
+		FFTCoefFragmentAnalysisAlgo res = model.findFFTFragmentROIAtTime(time);
 		return res;
 	}
 
@@ -390,7 +390,7 @@ public class SoundAnalysisView {
 		residualXAxis.setRange(lowerBound, upperBound);
 		
 		// display info of FFT in the current centered fragment
-		FFTCoefFragmentAnalysis currFFTFrag = findCurrPlotFFTFragment();
+		FFTCoefFragmentAnalysisAlgo currFFTFrag = findCurrPlotFFTFragment();
 		
 		if (currFFTFrag != null) {
 			String fftText = currFFTFrag.toStringData();

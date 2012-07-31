@@ -1,7 +1,8 @@
-package fr.an.tests.sound.testfft.sfft;
+package fr.an.tests.sound.testfft.math.fft;
 
-import fr.an.tests.sound.testfft.func.CosSinPolynom2;
-import fr.an.tests.sound.testfft.func.QuadraticForm;
+import fr.an.tests.sound.testfft.math.func.CosSinPolynom2;
+import fr.an.tests.sound.testfft.math.func.FragmentDataTime;
+import fr.an.tests.sound.testfft.math.func.QuadraticForm;
 
 public class FFTQuadFormUtils {
 
@@ -10,16 +11,13 @@ public class FFTQuadFormUtils {
 	/**
 	 * 
 	 */
-	public static void expandDL_dOmega_dPhi(double startTime, double endTime, int dataLen,  
-			double[] data,
+	public static void expandDL_dOmega_dPhi(FragmentDataTime fragmentDataTime,
 			final double a, final double omega0, final double phi0,
 			QuadraticForm resultQuad) {
 		
-		final double dt = (endTime - startTime) / dataLen;
-		double absoluteT = startTime;
 		double shiftT = 0.0;
 
-		double phi0_shiftT = omega0 * startTime + phi0;
+		double phi0_shiftT = omega0 * fragmentDataTime.getStartTime() + phi0;
 		
 		double tmpres_quadCoefs00 = 0;
 		double tmpres_quadCoefs01 = 0;
@@ -31,7 +29,12 @@ public class FFTQuadFormUtils {
 		double checkWithDOmega= 0.00;
 		double checkWithDPhi= 0.001;
 		
-		for (int i = 0; i < dataLen; i++) {
+		
+		final double[] compactArray = fragmentDataTime.getCompactTimeData4Array();
+		int compactIndexLast = compactArray.length;
+		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=4) {
+			double absoluteT = compactArray[compactIndex];
+			double dataT = compactArray[compactIndex+2];
 			// r = data[i] - a.cos(omega.t + phi)
 			//   = data[i] - a.cos((omega0 + domega).t + (phi0+dphi))
 			//   = data[i] - a.[ cos(omega0.t + phi0)) cos(domega.t + dphi)
@@ -48,7 +51,7 @@ public class FFTQuadFormUtils {
 			double a11 = 0.5 * a * cosw0stp;
 			double b0 = a * sinw0stp * shiftT;
 			double b1 = a * sinw0stp;
-			double c = data[i] - a * cosw0stp;
+			double c = dataT - a * cosw0stp;
 			
 			// => r^2
 			// r^2 =   t^(domega dphi) [ C.A + B.t^B ]  (domega dphi)
@@ -64,7 +67,7 @@ public class FFTQuadFormUtils {
 
 			if (DEBUG) {
 				double coswdwstpdp = Math.cos((omega0 + checkWithDOmega) * absoluteT + phi0 + checkWithDPhi);
-				double r = data[i] - a * coswdwstpdp;
+				double r = dataT - a * coswdwstpdp;
 				double varElt = r * r;
 				double checkR =  a00 * checkWithDOmega * checkWithDOmega
 						+ 2 * a01 * checkWithDOmega * checkWithDPhi
@@ -91,10 +94,6 @@ public class FFTQuadFormUtils {
 			tmpres_linCoefs0 += tmp_linCoefs0;
 			tmpres_linCoefs1 += tmp_linCoefs1;
 			tmpres_constCoef += tmp_constCoef;
-			
-			// next
-			shiftT += dt; // =  absoluteT - startTime
-			absoluteT += dt;
 		}
 
 		resultQuad.setQuadCoefs(0, 0, tmpres_quadCoefs00);
@@ -112,13 +111,10 @@ public class FFTQuadFormUtils {
 	 * r = data[i] - a.cos(omega.t + phi) ...where phi=phi0 + dphi
 	 * expand sum_i r^2 ... as a polynom in cos(dphi),sin(dphi)
 	 */
-	public static void expand_CosSinPolynom2_dPhi(double startTime, double endTime, int dataLen,  
-			double[] data,
+	public static void expand_CosSinPolynom2_dPhi(FragmentDataTime fragmentDataTime,
 			final double a0, final double omega0, final double phi0,
 			CosSinPolynom2 result) {
 		
-		final double dt = (endTime - startTime) / dataLen;
-
 		double tmp_coefCos2 = 0.0;
 		double tmp_coefSin2 = 0.0;
 		double tmp_coefCosSin_div2 = 0.0;
@@ -126,9 +122,12 @@ public class FFTQuadFormUtils {
 		double tmp_coefSin_div2 = 0.0;
 		double tmp_coefConst = 0.0;
 		
-		
-		double absoluteT = startTime;
-		for (int i = 0; i < dataLen; i++) {
+		final double[] compactArray = fragmentDataTime.getCompactTimeData4Array();
+		int compactIndexLast = compactArray.length;
+		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=4) {
+			double absoluteT = compactArray[compactIndex];
+			double dataT = compactArray[compactIndex+2];
+			
 			// r = data[i] - a0.cos(omega0.t + phi)
 			//   = data[i] - a0.cos(omega0.t + (phi0+dphi))
 			//   = data[i] - a0.[ cos(omega0.t + phi0)) cos(dphi) - sin(omega0.t + phi0)) sin(dphi) ]
@@ -152,12 +151,10 @@ public class FFTQuadFormUtils {
 			tmp_coefCos2 += c_i * c_i;
 			tmp_coefSin2 += s_i * s_i;
 			tmp_coefCosSin_div2 += c_i * s_i;
-			tmp_coefCos_div2 += data[i] * c_i;
-			tmp_coefSin_div2 += data[i] * s_i;
-			tmp_coefConst += data[i] * data[i]; 
+			tmp_coefCos_div2 += dataT * c_i;
+			tmp_coefSin_div2 += dataT * s_i;
+			tmp_coefConst += dataT * dataT; 
 
-			// next
-			absoluteT += dt;
 		}
 
 		result.setCoefCos2(tmp_coefCos2);
@@ -173,22 +170,21 @@ public class FFTQuadFormUtils {
 	/**
 	 * 
 	 */
-	public static double computeResidualVar(double startTime, double endTime, int dataLen,  
-			double[] data,
+	public static double computeResidualVar(FragmentDataTime dataTime,
 			final double a0, final double omega0, final double phi0) {
 		double res = 0.0;
 		
-		final double dt = (endTime - startTime) / dataLen;
-		double absoluteT = startTime;
-		
-		for (int i = 0; i < dataLen; i++) {
-			// r = data[i] - a.cos(omega.t + phi)
+		final double[] compactArray = dataTime.getCompactTimeData4Array();
+		final int compactIndexLast = compactArray.length;
+		for (int compactIndex=0; compactIndex < compactIndexLast; compactIndex+=4) {
+			double absoluteT = compactArray[compactIndex];
+			double dataT = compactArray[compactIndex + 2];
+			
+			// r = data[t] - a.cos(omega.t + phi)
 			double cosw0tp = Math.cos(omega0 * absoluteT + phi0);
-			double r = data[i] - a0 * cosw0tp;
+			double r = dataT - a0 * cosw0tp;
 			res += r * r;
 			
-			// next
-			absoluteT += dt;
 		}
 		return res;
 	}
@@ -198,22 +194,30 @@ public class FFTQuadFormUtils {
 	 * given a non-integer frequency <code>omega0</code> and phase <code>phi0</code>,
 	 * compute <code>N</code> Fourier coefficients, for frequencies 1.w, 2.w, 3.w, ..N.w and SAME phase 
 	 */
-	public static void computeFourierNSubHarmonicCoefs(double startTime, double endTime, int dataLen,  
-			double[] data,
+	public static void computeFourierNSubHarmonicCoefs(FragmentDataTime fragmentDataTime,
 			final double w0, final double phi0,
 			double[] resultFourierSubCoefs) {
-		final double dt = (endTime - startTime) / dataLen;
-		double absoluteT = startTime;
-		
 		final int K = resultFourierSubCoefs.length;
-		for (int i = 0; i < dataLen; i++) {
+
+		final double[] compactArray = fragmentDataTime.getCompactTimeData4Array();
+		int compactIndexLast = compactArray.length;
+
+		for (int k = 1; k < K; k++) {
+			resultFourierSubCoefs[k] = 0.0;
+		}
+		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=4) {
+			double absoluteT = compactArray[compactIndex];
+			double dataT = compactArray[compactIndex+2];
+
 			// r = data[i] - a.cos(omega.t + phi)
 			for (int k = 1; k < K; k++) {
-				double ck = data[i] * Math.cos(k * w0 * absoluteT + phi0);
-				resultFourierSubCoefs[k] += ck; 
+				double ck = dataT * Math.cos(k * w0 * absoluteT + phi0);
+				resultFourierSubCoefs[k] += ck;
 			}
-			// next
-			absoluteT += dt;
+		}
+		double ratioFft = 2.0 / ( fragmentDataTime.getFragmentLen() - 1); // -1 ??
+		for (int k = 1; k < K; k++) {
+			resultFourierSubCoefs[k] *= ratioFft;
 		}
 	}
 	

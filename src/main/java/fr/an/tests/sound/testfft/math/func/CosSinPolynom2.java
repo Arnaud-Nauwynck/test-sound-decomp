@@ -1,4 +1,4 @@
-package fr.an.tests.sound.testfft.func;
+package fr.an.tests.sound.testfft.math.func;
 
 import org.ejml.data.DenseMatrix64F;
 

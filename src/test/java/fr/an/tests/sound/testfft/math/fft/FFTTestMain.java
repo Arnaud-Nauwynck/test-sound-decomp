@@ -1,10 +1,11 @@
-package fr.an.tests.sound.testfft.utils;
+package fr.an.tests.sound.testfft.math.fft;
 
-import fr.an.tests.sound.testfft.SoundAnalysisModel;
+import fr.an.tests.sound.testfft.SoundAnalysis;
 import fr.an.tests.sound.testfft.SoundFragmentAnalysis;
-import fr.an.tests.sound.testfft.sfft.FFT;
-import fr.an.tests.sound.testfft.sfft.FFTCoefEntry;
-import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis;
+import fr.an.tests.sound.testfft.algos.sfft.FFTCoefEntry;
+import fr.an.tests.sound.testfft.algos.sfft.FFTCoefFragmentAnalysisAlgo;
+import fr.an.tests.sound.testfft.math.fft.FFT;
+import fr.an.tests.sound.testfft.math.func.FragmentDataTime;
 
 /**
  * Hello world!
@@ -30,12 +31,13 @@ public class FFTTestMain
         double[] data = new double[fragmentLen];
         FFT fft = new FFT(fragmentLen, frameRate);
 
-        SoundAnalysisModel model = new SoundAnalysisModel("test");
+        SoundAnalysis model = new SoundAnalysis("test");
         model.setFrameRate(frameRate);
         model.setAudioDataAsDouble(data);
         
-        SoundFragmentAnalysis frag = new SoundFragmentAnalysis(model, 0, fragmentLen, 0.0, dt, fft); 
-        FFTCoefFragmentAnalysis fftFragAnalysis = new FFTCoefFragmentAnalysis(frag, fft);
+        FragmentDataTime fragDataTime = new FragmentDataTime(fragmentLen, 0.0, duration, null, null); 
+        SoundFragmentAnalysis frag = new SoundFragmentAnalysis(model, fragDataTime, fft); 
+        FFTCoefFragmentAnalysisAlgo fftFragAnalysis = new FFTCoefFragmentAnalysisAlgo(frag, fft);
         double Period = 2*Math.PI;
         double inv_Period = 1.0 / Period; 
 

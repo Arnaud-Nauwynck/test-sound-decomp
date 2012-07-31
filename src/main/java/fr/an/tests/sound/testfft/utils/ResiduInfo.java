@@ -1,6 +1,5 @@
-package fr.an.tests.sound.testfft;
+package fr.an.tests.sound.testfft.utils;
 
-import fr.an.tests.sound.testfft.utils.DoubleFmtUtil;
 
 public class ResiduInfo {
 

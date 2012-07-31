@@ -1,4 +1,4 @@
-package fr.an.tests.sound.testfft.func;
+package fr.an.tests.sound.testfft.math.func;
 
 import java.util.Random;
 
@@ -6,7 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
-import fr.an.tests.sound.testfft.func.QuadraticForm;
+import fr.an.tests.sound.testfft.math.func.QuadraticForm;
 
 
 public class QuadraticFormTest {

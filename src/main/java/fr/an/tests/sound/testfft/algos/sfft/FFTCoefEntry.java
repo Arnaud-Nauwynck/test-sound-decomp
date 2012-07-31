@@ -1,5 +1,6 @@
-package fr.an.tests.sound.testfft.sfft;
+package fr.an.tests.sound.testfft.algos.sfft;
 
+import fr.an.tests.sound.testfft.math.fft.FFT;
 import fr.an.tests.sound.testfft.utils.DoubleFmtUtil;
 
 public class FFTCoefEntry {
@@ -42,7 +43,10 @@ public class FFTCoefEntry {
     	this.phi = Math.atan2(coefSin, coefCos);
 	}
 	
-	
+	public FFT getFft() {
+		return fft;
+	}
+
 	public int getIndex() {
 		return index;
 	}

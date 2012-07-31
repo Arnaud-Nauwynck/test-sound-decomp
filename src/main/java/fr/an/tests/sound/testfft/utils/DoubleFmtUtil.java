@@ -5,9 +5,9 @@ import java.text.NumberFormat;
 
 import org.ejml.data.DenseMatrix64F;
 
-import fr.an.tests.sound.testfft.func.CosSinPolynom2;
-import fr.an.tests.sound.testfft.func.QuadraticForm;
-import fr.an.tests.sound.testfft.sfft.FFT;
+import fr.an.tests.sound.testfft.math.fft.FFT;
+import fr.an.tests.sound.testfft.math.func.CosSinPolynom2;
+import fr.an.tests.sound.testfft.math.func.QuadraticForm;
 
 public class DoubleFmtUtil {
 

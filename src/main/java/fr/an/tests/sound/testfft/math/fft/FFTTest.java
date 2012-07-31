@@ -1,4 +1,4 @@
-package fr.an.tests.sound.testfft.sfft;
+package fr.an.tests.sound.testfft.math.fft;
 
 import java.util.Arrays;
 import java.util.SortedSet;
@@ -6,12 +6,12 @@ import java.util.TreeSet;
 
 import org.junit.Test;
 
-import fr.an.tests.sound.testfft.SoundAnalysisModel;
+import fr.an.tests.sound.testfft.SoundAnalysis;
 import fr.an.tests.sound.testfft.SoundFragmentAnalysis;
-import fr.an.tests.sound.testfft.sfft.FFT;
-import fr.an.tests.sound.testfft.sfft.FFTCoefEntry;
-import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis;
-import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis.FFTCoefEntryNormDescComparator;
+import fr.an.tests.sound.testfft.algos.sfft.FFTCoefEntry;
+import fr.an.tests.sound.testfft.algos.sfft.FFTCoefFragmentAnalysisAlgo;
+import fr.an.tests.sound.testfft.algos.sfft.FFTCoefFragmentAnalysisAlgo.FFTCoefEntryNormDescComparator;
+import fr.an.tests.sound.testfft.math.fft.FFT;
 
 public class FFTTest {
 

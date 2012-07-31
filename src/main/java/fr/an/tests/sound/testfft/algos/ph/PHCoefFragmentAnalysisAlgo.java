@@ -1,4 +1,4 @@
-package fr.an.tests.sound.testfft.synth;
+package fr.an.tests.sound.testfft.algos.ph;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -6,19 +6,21 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
-import fr.an.tests.sound.testfft.ResiduInfo;
 import fr.an.tests.sound.testfft.SoundFragmentAnalysis;
-import fr.an.tests.sound.testfft.func.CosSinPolynom2;
-import fr.an.tests.sound.testfft.func.QuadraticForm;
-import fr.an.tests.sound.testfft.sfft.FFT;
-import fr.an.tests.sound.testfft.sfft.FFTCoefEntry;
-import fr.an.tests.sound.testfft.sfft.FFTCoefFragmentAnalysis;
-import fr.an.tests.sound.testfft.sfft.FFTQuadFormUtils;
-import fr.an.tests.sound.testfft.synth.PHCoefEntry.IntermediateTParams;
+import fr.an.tests.sound.testfft.SoundFragmentAnalysisAlgo;
+import fr.an.tests.sound.testfft.algos.ph.PHCoefEntry.IntermediateTParams;
+import fr.an.tests.sound.testfft.algos.sfft.FFTCoefEntry;
+import fr.an.tests.sound.testfft.algos.sfft.FFTCoefFragmentAnalysisAlgo;
+import fr.an.tests.sound.testfft.math.fft.FFT;
+import fr.an.tests.sound.testfft.math.fft.FFTQuadFormUtils;
+import fr.an.tests.sound.testfft.math.func.CosSinPolynom2;
+import fr.an.tests.sound.testfft.math.func.FragmentDataTime;
+import fr.an.tests.sound.testfft.math.func.QuadraticForm;
 import fr.an.tests.sound.testfft.utils.DoubleFmtUtil;
 import fr.an.tests.sound.testfft.utils.DoubleUtil;
+import fr.an.tests.sound.testfft.utils.ResiduInfo;
 
-public class PHCoefFragmentAnalysis {
+public class PHCoefFragmentAnalysisAlgo implements SoundFragmentAnalysisAlgo {
 
 	private static boolean DEBUG = true;
 	private static boolean DEBUG_CHEAT_440 = false;
@@ -28,9 +30,9 @@ public class PHCoefFragmentAnalysis {
 	private static boolean adjustOmegaHeuristicNeighboor = false;
 	
 	private static boolean adjustOmegaWithSteps = true;
-	private static int adjustOmegaStepsCount = 6;
-	private static int adjustOmegaStepsRecurseCount = 4;
-	private static int computeFourierSubHarmonicCoefs = 0; // 6;  //TODO
+	private static int adjustOmegaStepsCount = 5;
+	private static int adjustOmegaStepsRecurseCount = 5;
+	private static int computeFourierSubHarmonicCoefs = 6;  //TODO
 
 	private static boolean adjustOmegaPhi = false;
 
@@ -46,7 +48,7 @@ public class PHCoefFragmentAnalysis {
 	
 	// ------------------------------------------------------------------------
 
-	public PHCoefFragmentAnalysis(SoundFragmentAnalysis fragment) {
+	public PHCoefFragmentAnalysisAlgo(SoundFragmentAnalysis fragment) {
 		this.fragment = fragment;
 	}
 	
@@ -70,8 +72,8 @@ public class PHCoefFragmentAnalysis {
 		
 		List<PHCoefEntry> coefEntries = new ArrayList<PHCoefEntry>(MAX_PH_COEF_LEN);
 		
-		double startTime = fragment.getStartTime();
-		double endTime = fragment.getEndTime();
+		double _startTime = fragment.getFragmentDataTime().getStartTime();
+		double endTime = fragment.getFragmentDataTime().getEndTime();
 //		double dt = (endTime - startTime) / fragmentLen;
 //		double currTime = startTime;
 //		double[] times = new double[fragmentLen];
@@ -111,10 +113,10 @@ public class PHCoefFragmentAnalysis {
 		
 			double[] stepResidualData = new double[fragmentLen];
 			System.arraycopy(residualData, 0, stepResidualData, 0, fragmentLen);
-			SoundFragmentAnalysis stepResidualFragment = new SoundFragmentAnalysis(fragment.getModel(), fragment.getStartFrameIndex(), fragment.getFragmentLen(),
-					fragment.getStartTime(), fragment.getDt(), fft);
+			FragmentDataTime residualTimeData = new FragmentDataTime(fragment.getFragmentDataTime(), stepResidualData); 
+			SoundFragmentAnalysis stepResidualFragment = new SoundFragmentAnalysis(fragment.getModel(), residualTimeData, fft);
 			stepResidualFragment.setData(stepResidualData);
-			FFTCoefFragmentAnalysis fftFragmentAnalysis = new FFTCoefFragmentAnalysis(stepResidualFragment, fft);
+			FFTCoefFragmentAnalysisAlgo fftFragmentAnalysis = new FFTCoefFragmentAnalysisAlgo(stepResidualFragment, fft);
 			fftFragmentAnalysis.computeAnalysis(null);
 			
 			FFTCoefEntry fftCoef0 = fftFragmentAnalysis.getSortedCoefEntries()[0];
@@ -130,7 +132,7 @@ public class PHCoefFragmentAnalysis {
 
 			double varC0 = 0.0;
 			if (debugPrinter != null) {
-				varC0 = FFTQuadFormUtils.computeResidualVar(startTime, endTime, fragmentLen, residualData,
+				varC0 = FFTQuadFormUtils.computeResidualVar(residualTimeData,
 					fftc0_a0, fftc0_w0, fftc0_phi0);
 			}
 			
@@ -168,7 +170,7 @@ public class PHCoefFragmentAnalysis {
 			
 			
 			if (adjustPhi) {
-				FFTQuadFormUtils.expand_CosSinPolynom2_dPhi(startTime, endTime, fragmentLen, residualData,
+				FFTQuadFormUtils.expand_CosSinPolynom2_dPhi(residualTimeData,
 						fftc0_a0, fftc0_w, fftc0_phi,
 						cossinPolynom2_dphi);
 				
@@ -182,7 +184,7 @@ public class PHCoefFragmentAnalysis {
 					double varNullDPhi = cossinPolynom2_dphi.eval(0);
 					
 					double expectedVarPhi = cossinPolynom2_dphi.eval(solved_dphi);
-					double varPhi = FFTQuadFormUtils.computeResidualVar(startTime, endTime, fragmentLen, residualData,
+					double varPhi = FFTQuadFormUtils.computeResidualVar(residualTimeData,
 							fftc0_a0, fftc0_w, solved_phi);
 					if (Math.abs(expectedVarPhi - varPhi) > 1e-2) {
 						System.err.println("adjustPhi  unexpected diff" 
@@ -203,7 +205,7 @@ public class PHCoefFragmentAnalysis {
 				double foundOmegaArgMinVar = fftc0_w;
 				double foundPhiArgMinVar = fftc0_phi;
 
-				FFTQuadFormUtils.expand_CosSinPolynom2_dPhi(startTime, endTime, fragmentLen, residualData,
+				FFTQuadFormUtils.expand_CosSinPolynom2_dPhi(residualTimeData,
 						fftc0_a0, fftc0_w, fftc0_phi,
 						cossinPolynom2_dphi);
 				double foundMinVar = cossinPolynom2_dphi.eval(fftc0_phi + cossinPolynom2_dphi.solveArgMin());
@@ -223,7 +225,7 @@ public class PHCoefFragmentAnalysis {
 					double currSolveOmega = foundOmegaArgMinVar - 0.5 * omegaSolveRange;
 					for (int omegaSolveIndex = 0; omegaSolveIndex < adjustOmegaStepsCount; omegaSolveIndex++,currSolveOmega+=omegaSolveStep) {
 						// for each omega value, solve phi and get var
-						FFTQuadFormUtils.expand_CosSinPolynom2_dPhi(startTime, endTime, fragmentLen, residualData,
+						FFTQuadFormUtils.expand_CosSinPolynom2_dPhi(residualTimeData,
 								fftc0_a0, currSolveOmega, fftc0_phi,
 								cossinPolynom2_dphi);
 						double currOmega_dphi = cossinPolynom2_dphi.solveArgMin();
@@ -259,8 +261,7 @@ public class PHCoefFragmentAnalysis {
 
 			if (adjustOmegaPhi) {
 				for (int repeatAdjustdOmegadPhi = 0; repeatAdjustdOmegadPhi < 3; repeatAdjustdOmegadPhi++) {
-					FFTQuadFormUtils.expandDL_dOmega_dPhi(startTime, endTime, fragmentLen, 
-							residualData,
+					FFTQuadFormUtils.expandDL_dOmega_dPhi(residualTimeData,
 							fftc0_a0, fftc0_w, fftc0_phi,
 							quad_domega_dphi);
 	
@@ -283,7 +284,7 @@ public class PHCoefFragmentAnalysis {
 							solved_dphi = -0.5 * quad_domega_dphi.getLinCoefs().get(1) / quad11;
 							fftc0_phi += solved_dphi;
 							
-							double varDPhi = FFTQuadFormUtils.computeResidualVar(startTime, endTime, fragmentLen, residualData,
+							double varDPhi = FFTQuadFormUtils.computeResidualVar(residualTimeData,
 									fftc0_a0, fftc0_w0, fftc0_phi0 + solved_dphi);
 							
 							if (debugPrinter != null) {
@@ -308,7 +309,7 @@ public class PHCoefFragmentAnalysis {
 						if (debugPrinter != null) {
 							// double var = currCoefEntry.computeVarValues(startTime, endTime, timeLen, times, origData)Var(startTime, endTime, fragmentLen, residualData);
 															
-							double var = FFTQuadFormUtils.computeResidualVar(startTime, endTime, fragmentLen, residualData,
+							double var = FFTQuadFormUtils.computeResidualVar(residualTimeData,
 									fftc0_a0, fftc0_w, fftc0_phi);
 							debugPrinter.println("adjust quadratic "
 									+ " dw,dphi:" + DoubleFmtUtil.fmtFreqDouble3(solved_domega) + ", " + DoubleFmtUtil.fmtPhaseDouble3(solved_dphi)
@@ -323,7 +324,7 @@ public class PHCoefFragmentAnalysis {
 			
 
 			if (debugPrinter != null) {
-				debugPrinter.println("PH coef: set init guess p0,p1,p2: " 
+				debugPrinter.println("PH coef: set init guess a,omega,phi: " 
 						+ DoubleFmtUtil.fmtDouble3(fftc0_a0) 
 						+ ", " + DoubleFmtUtil.fmtFreqDouble3(fftc0_w) 
 						+ ", " + DoubleFmtUtil.fmtPhaseDouble3(fftc0_phi));
@@ -331,8 +332,7 @@ public class PHCoefFragmentAnalysis {
 			currCoefEntry.setInitGuess(fftc0_a0, fftc0_w, fftc0_phi);
 
 			if (computeFourierSubHarmonicCoefs > 1) {
-				FFTQuadFormUtils.computeFourierNSubHarmonicCoefs(startTime, endTime, fragmentLen, 
-						residualData,
+				FFTQuadFormUtils.computeFourierNSubHarmonicCoefs(residualTimeData,
 						fftc0_w, fftc0_phi,
 						fourierSubHarmonicCoefs);
 
@@ -345,79 +345,77 @@ public class PHCoefFragmentAnalysis {
 			}
 				
 			
-			boolean usep7p12 = false;
-			if (usep7p12) {
-				double initguess_p7 = 0.0; 
-				double initguess_p9 = 0.0; 
-				double initguess_p10 = 0.0; 
-				double initguess_p12 = 0.0; 
-				int fftCoef0_windex = fftCoef0.getIndex();
-				if (fftCoef0_windex * 2 < fftLen) {
-					FFTCoefEntry coef2W = fftFragmentAnalysis.getCoefEntries()[fftCoef0_windex * 2];
-					initguess_p7 = coef2W.getNorm() / fftc0_a0;
-					initguess_p9 = coef2W.getPhi() - fftc0_phi;
-	
-					if (fftCoef0_windex * 3 < fftLen) {
-						FFTCoefEntry coef3W = fftFragmentAnalysis.getCoefEntries()[fftCoef0_windex * 3];
-						initguess_p7 = coef3W.getNorm() / fftc0_a0;
-						initguess_p9 = coef3W.getPhi() - fftc0_phi;
-					}
-	
-					if (debugPrinter != null) {
-						debugPrinter.println("PH coef: set init guess 2*freq => p7:" + initguess_p7 
-								+ ", p9:" + initguess_p9 + ", p10:" + initguess_p10
-								+ ", p12:" + initguess_p12);
-					}
-					currCoefEntry.setInitGuess2W(initguess_p7, initguess_p9, initguess_p10, initguess_p12);
-				}
-			}
+//			boolean usep7p12 = false;
+//			if (usep7p12) {
+//				double initguess_correl_a2_a1 = 0.0;
+//				double initguess_correl_a3_a1 = 0.0; 
+//				double initguess_ = 0.0; 
+//				double initguess_ = 0.0; 
+//				int fftCoef0_windex = fftCoef0.getIndex();
+//				if (fftCoef0_windex * 2 < fftLen) {
+//					FFTCoefEntry coef2W = fftFragmentAnalysis.getCoefEntries()[fftCoef0_windex * 2];
+//					initguess_correl_a2_a1 = coef2W.getNorm() / fftc0_a0;
+//					initguess_p9 = coef2W.getPhi() - fftc0_phi;
+//	
+//					if (fftCoef0_windex * 3 < fftLen) {
+//						FFTCoefEntry coef3W = fftFragmentAnalysis.getCoefEntries()[fftCoef0_windex * 3];
+//						initguess_p7 = coef3W.getNorm() / fftc0_a0;
+//						initguess_p9 = coef3W.getPhi() - fftc0_phi;
+//					}
+//	
+//					if (debugPrinter != null) {
+//						debugPrinter.println("PH coef: set init guess 2*freq => p7:" + initguess_p7 
+//								+ ", p9:" + initguess_p9 + ", p10:" + initguess_p10
+//								+ ", p12:" + initguess_p12);
+//					}
+//					currCoefEntry.setInitGuess2W(initguess_correl_a2_a1, initguess_p9, initguess_p10, initguess_p12);
+//				}
+//			}
 			
 			
-			currCoefEntry.expandVarValues_Quadratic_p0p3p5(startTime, endTime, fragmentLen, 
-					residualData,
-					quad_p0p3p5);
-
-			if (debugPrinter != null) {
-				debugPrinter.println("compute quad form for p0,p3,p5\n" + quad_p0p3p5);
-			}
-			
-			double[] p = currCoefEntry.getP();
-
-			// => pseudo inverse matrix p0p3p5 (quadratic form)
-			boolean solvedOK = quad_p0p3p5.solveArgMin(solved_p0p3p5);
-			if (solvedOK) {
-				double ejml_new_p0 = solved_p0p3p5.get(0);
-				double ejml_new_p3 = solved_p0p3p5.get(1);
-				double ejml_new_p5 = solved_p0p3p5.get(2);
-				
-				double expectedSolvedVar = quad_p0p3p5.eval(solved_p0p3p5);
-				if (debugPrinter != null) {
-					debugPrinter.println("solve quad min (pseudo inverse) => "
-							+ "p0,p3,p5:" + DoubleFmtUtil.fmtDouble3(solved_p0p3p5)
-							+ ", expected residu var:" + DoubleFmtUtil.fmtDouble3(expectedSolvedVar));
-				}
-				
-				if (Math.abs(ejml_new_p0 - p[0]) < 50.0
-						&& Math.abs(ejml_new_p3 - p[3]) < 50.0
-						&& Math.abs(ejml_new_p5 - p[5]) < 50.0) {
-					p[0] = ejml_new_p0;
-					p[3] = ejml_new_p3;
-					p[5] = ejml_new_p5;
-				} else {
-					if (debugPrinter != null) debugPrinter.println("REJECTED !");
-				}
-				
-			
-			} else {
-				if (debugPrinter != null) {
-					debugPrinter.println("*** quad matrix NOT sym definite positive!?");
-					coefEntries.add(currCoefEntry);
-				}
-			}
+//			currCoefEntry.expandVarValues_Quadratic_p0p3p5(startTime, endTime, fragmentLen, 
+//					residualData,
+//					quad_p0p3p5);
+//
+//			if (debugPrinter != null) {
+//				debugPrinter.println("compute quad form for p0,p3,p5\n" + quad_p0p3p5);
+//			}
+//
+//			// => pseudo inverse matrix p0p3p5 (quadratic form)
+//			boolean solvedOK = quad_p0p3p5.solveArgMin(solved_p0p3p5);
+//			if (solvedOK) {
+//				double ejml_new_p0 = solved_p0p3p5.get(0);
+//				double ejml_new_p3 = solved_p0p3p5.get(1);
+//				double ejml_new_p5 = solved_p0p3p5.get(2);
+//				
+//				double expectedSolvedVar = quad_p0p3p5.eval(solved_p0p3p5);
+//				if (debugPrinter != null) {
+//					debugPrinter.println("solve quad min (pseudo inverse) => "
+//							+ "p0,p3,p5:" + DoubleFmtUtil.fmtDouble3(solved_p0p3p5)
+//							+ ", expected residu var:" + DoubleFmtUtil.fmtDouble3(expectedSolvedVar));
+//				}
+//				
+//				if (Math.abs(ejml_new_p0 - p[0]) < 50.0
+//						&& Math.abs(ejml_new_p3 - p[3]) < 50.0
+//						&& Math.abs(ejml_new_p5 - p[5]) < 50.0) {
+//					p[0] = ejml_new_p0;
+//					p[3] = ejml_new_p3;
+//					p[5] = ejml_new_p5;
+//				} else {
+//					if (debugPrinter != null) debugPrinter.println("REJECTED !");
+//				}
+//				
+//			
+//			} else {
+//				if (debugPrinter != null) {
+//					debugPrinter.println("*** quad matrix NOT sym definite positive!?");
+//					coefEntries.add(currCoefEntry);
+//				}
+//			}
 			
 			// compute residualData for next iteration
-			double var = currCoefEntry.computeResidualValues(startTime, endTime, fragmentLen,  
-					tmpResidualData, residualData);
+			double var = currCoefEntry.computeResidualValues(residualTimeData, residualTimeData.getStartIndexROI(), residualTimeData.getEndIndexROI(),
+					tmpResidualData, 0);
 			currCoefEntry.setResidualVar(var);
 			double[] tmp = tmpResidualData;
 			tmpResidualData = residualData; 
@@ -434,13 +432,9 @@ public class PHCoefFragmentAnalysis {
 
 
 	public void getReconstructedMainHarmonics(final int harmonicCount, 
-			final int resultStartIndex, final int resultEndIndex, final double startTime, final double dt, 
-			double[] resultData,
+			FragmentDataTime fragDataTime, int startIndexROI, int endIndexROI, 
+			double[] resultData, final int resultStartIndex, 
 			ResiduInfo residuInfo) {
-		final double dht = 1.0 / (resultEndIndex - resultStartIndex);
-		double t = startTime;
-		double ht = 0.0;
-		int hi = 0;
 		
 		int tmpmaxPHCount = Math.min(harmonicCount, sortedCoefEntries.length);
 		int maxPHCount = tmpmaxPHCount;
@@ -452,40 +446,37 @@ public class PHCoefFragmentAnalysis {
 			int eHCount = e.getSubHarmonicCountNonNulls();
 			// TODO.... solve on sub harmonic... use  
 			tmpHarmonicCount += eHCount;
-			
-			if (tmpHarmonicCount >= harmonicCount) {
+			if (tmpHarmonicCount > harmonicCount) {
 				truncateLastPHSubHarmonicCount = tmpHarmonicCount - harmonicCount;
 				maxPHCount = ph + 1;
+				break;
+			} else if (ph + 1 == tmpmaxPHCount) {
+				truncateLastPHSubHarmonicCount = eHCount;
 				break;
 			}
 		}
 		IntermediateTParams[] it_ph = new IntermediateTParams[maxPHCount];
 		for (int ph = 0; ph < maxPHCount; ph++) {
 			PHCoefEntry e = sortedCoefEntries[ph];
-			int eHCount = e.getSubHarmonicCount();
-			it_ph[ph] = new IntermediateTParams(eHCount);
+			it_ph[ph] = new IntermediateTParams(e);
 		}
 		
-		for (int i = resultStartIndex; i < resultEndIndex; i++) {
+		final int compactIndexLast = startIndexROI + 4 * (endIndexROI - startIndexROI);
+		int resultIndex = resultStartIndex;
+		for (int i = startIndexROI,compactIndex = 4*startIndexROI; compactIndex < compactIndexLast; i++,compactIndex+=4,resultIndex++) {
 			double tmpapprox = 0;
 			for (int ph = 0; ph < maxPHCount; ph++) {
 				PHCoefEntry e = sortedCoefEntries[ph];
-				e.precomputeForT(it_ph[ph], t, ht);
+				it_ph[ph].setPrecomputeForT(fragDataTime, i, compactIndex);
 				if (ph + 1 == maxPHCount) {
 					// TODO... truncate last harmonics params for last ph only
-					
+					tmpapprox += e.computeValueMainHarmonics(it_ph[ph], truncateLastPHSubHarmonicCount);
+					break;
 				}
 				
-				tmpapprox += e.computeValue(t, it_ph[ph]);
+				tmpapprox += e.computeValue(it_ph[ph]);
 			}
-			resultData[i] = tmpapprox;
-			
-//			t += dt;
-//			ht += dht;
-			// same but less rounding errors?
-			hi++;
-			t = startTime + dt * hi;
-			ht = dht * hi;
+			resultData[resultIndex] = tmpapprox;
 		}
 
 //		residuInfo.cumulSquareNormCoef = ;

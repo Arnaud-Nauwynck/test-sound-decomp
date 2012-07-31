@@ -1,4 +1,4 @@
-package fr.an.tests.sound.testfft;
+package fr.an.tests.sound.testfft.ui;
 
 import java.awt.Dimension;
 import java.io.File;
@@ -7,9 +7,14 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
-import fr.an.tests.sound.testfft.sfft.FFT;
-import fr.an.tests.sound.testfft.synth.PHCoefEntry;
-import fr.an.tests.sound.testfft.synth.PHCoefFragmentAnalysis;
+import fr.an.tests.sound.testfft.SoundAnalysis;
+import fr.an.tests.sound.testfft.SoundFragmentAnalysis;
+import fr.an.tests.sound.testfft.algos.ph.PHCoefEntry;
+import fr.an.tests.sound.testfft.algos.ph.PHCoefFragmentAnalysisAlgo;
+import fr.an.tests.sound.testfft.math.fft.FFT;
+import fr.an.tests.sound.testfft.math.func.FragmentDataTime;
+import fr.an.tests.sound.testfft.math.func.FragmentTimesFunc;
+import fr.an.tests.sound.testfft.math.func.PiecewiseQuadFragmentTimesFunc;
 
 public class ReadFileMain {
 
@@ -26,10 +31,10 @@ public class ReadFileMain {
 //			"myriam-singing-in-the-rain.wav",
 			// missing... "fl-do-gr.wav",
 //			"fl-re-gr.wav",
-			"fl-mi-gr.wav",
+//			"fl-mi-gr.wav",
 //			"fl-fa-gr.wav",
 //			"fl-sol-gr.wav",
-			"fl-la-gr.wav",
+//			"fl-la-gr.wav",
 //			"fl-si-gr.wav",
 //
 //			"fl-do.wav",
@@ -43,7 +48,9 @@ public class ReadFileMain {
 		};
 
 		boolean useSynth = true;
-		boolean useSynthPH = true;
+		boolean useSynthPH = 
+//				false;
+				true;
 
 		boolean play = 
 				false;
@@ -71,31 +78,35 @@ public class ReadFileMain {
 		int synthFragmentsCount = totalFrameLength / fragmentLen;
 		
 		// double totalDuration = totalFrameLength / frameRate;
-		double fragmentDuration = fragmentLen / frameRate;
-		double dt = 1.0 / frameRate;
+		double fragmentDuration = (double)fragmentLen / frameRate;
 
 
 		FFT fft = new FFT(fragmentLen, frameRate);
 
 		
 		if (useSynth) {
-			SoundAnalysisModel model = new SoundAnalysisModel("synth");
+			SoundAnalysis model = new SoundAnalysis("synth");
 			model.setFrameRate(frameRate);
 			
 			SoundFragmentAnalysis[] fragments = new SoundFragmentAnalysis[synthFragmentsCount];
 			int currStartIndex = 0;
 			double currStartTime = 0.0;
 			for (int i = 0; i < synthFragmentsCount; i++) {
-				SoundFragmentAnalysis frag = new SoundFragmentAnalysis(model, currStartIndex, fragmentLen, currStartTime, dt, fft);
+				double currEndTime = currStartTime + fragmentDuration;
+				FragmentDataTime fragmentDataTime = new FragmentDataTime(fragmentLen, currStartTime, currEndTime, null, null);
+
+				SoundFragmentAnalysis frag = new SoundFragmentAnalysis(model, fragmentDataTime, fft);
 				fragments[i] = frag;
 				
 				PHCoefEntry[] sortedCoefEntries = new PHCoefEntry[1];
 				PHCoefEntry coefEntry = sortedCoefEntries[0] = new PHCoefEntry();
-				double[] p = coefEntry.getP();
-				p[0] = 1.0;
+
+				double a1 = 1.0;
 				double baseFreq = 440.0;  // 440 Hz for a flute "LA"
-				p[1] = baseFreq * (2.0*Math.PI);  // w=2.pi.f
-				p[2]= 0.0;
+				double w1 = baseFreq * (2.0*Math.PI);  // w=2.pi.f
+				double phi1 = 0.0; // TODO... currStartTime modulo freq ??
+				coefEntry.setInitGuess(a1, w1, phi1);
+
 				frag.getPhCoefAnalysisFragment().setSortedCoefEntries(sortedCoefEntries);
 				
 				currStartIndex += fragmentLen;
@@ -105,34 +116,46 @@ public class ReadFileMain {
 		}
 		
 		if (useSynthPH) {
-			SoundAnalysisModel model = new SoundAnalysisModel("PH-synth");
+			SoundAnalysis model = new SoundAnalysis("PH-synth");
 			model.setFrameRate(frameRate);
 			SoundFragmentAnalysis[] fragments = new SoundFragmentAnalysis[synthFragmentsCount];
 			int currStartIndex = 0;
 			double currStartTime = 0.0;
 			for (int i = 0; i < synthFragmentsCount; i++) {
-				SoundFragmentAnalysis frag = new SoundFragmentAnalysis(model, currStartIndex, fragmentLen, currStartTime, dt, fft);
+				double currEndTime = currStartTime + fragmentDuration;
+				FragmentDataTime fragmentDataTime = new FragmentDataTime(fragmentLen, currStartTime, currEndTime, null, null);
+				
+				SoundFragmentAnalysis frag = new SoundFragmentAnalysis(model, fragmentDataTime, fft);
 				fragments[i] = frag;
 				
 				int coefEntriesCount = 1;
 				PHCoefEntry[] sortedCoefEntries = new PHCoefEntry[coefEntriesCount];
 				for(int c = 0; c < coefEntriesCount; c++) {
 					PHCoefEntry coefEntry = sortedCoefEntries[c] = new PHCoefEntry();
-					double[] p = coefEntry.getP();
 					
 					double shiftStart = ((i%2) == 0)? +0.3 : -0.3;
-					double shiftEnd = -2 * shiftStart;
+					double shiftEnd = - shiftStart;
 					
-					p[0] = 1.0 + shiftStart;
+					double a1 = 1.0;
 					double baseFreq = (1.0+(double)c/5) * 440.0;  // 440 Hz for a flute "LA"
-					p[1] = baseFreq * (2.0*Math.PI);  // w=2.pi.f
-					p[2]= 0.0; // TODO... currStartTime modulo freq ??
+					double w1 = baseFreq * (2.0*Math.PI);  // w=2.pi.f
+					double phi1 = 0.0; // TODO... currStartTime modulo freq ??
 					
-					p[3] = shiftEnd;
+					coefEntry.setInitGuess(a1, w1, phi1);
+					
+					double amplFactorStart = 1.0 + shiftStart;
+					double amplFactorEnd = 1.0 + shiftEnd;
+					
+					FragmentTimesFunc amplitudeFactor = new PiecewiseQuadFragmentTimesFunc(
+							new double[] { currStartTime, currEndTime },
+							new double[] { amplFactorStart, amplFactorEnd },
+							null,
+							fragmentDataTime);
+					coefEntry.setTimeAmplitudeFactor(amplitudeFactor);
 					
 					// TODO ARNAUD
 					
-				}
+				}//for coef
 				frag.getPhCoefAnalysisFragment().setSortedCoefEntries(sortedCoefEntries);
 
 				currStartIndex += fragmentLen;
@@ -145,7 +168,7 @@ public class ReadFileMain {
 	protected static void doAnalyseFile(File file, JTabbedPane tabbedPane, boolean play) {
 		System.out.println("Analysing file " + file);
 		
-		SoundAnalysisModel model = new SoundAnalysisModel(file.getName());
+		SoundAnalysis model = new SoundAnalysis(file.getName());
 		
 		model.readData(file);
 		
@@ -171,29 +194,28 @@ public class ReadFileMain {
 			JTabbedPane tabbedPane, boolean play) {
 		// System.out.println("synthetizing " + synthName);
 		
-		SoundAnalysisModel model = new SoundAnalysisModel(synthName);
+		SoundAnalysis model = new SoundAnalysis(synthName);
 		model.setFrameRate(frameRate);
 		model.setFrameLength(totalFrameLength);
 		double[] synthData = new double[totalFrameLength];
 		
-		double dt = 1.0 / model.getFrameRate();
 		double currStartTime = 0.0;
 		int currStartIndex = 0;
 		
 		for (SoundFragmentAnalysis frag : fragments) {
-			PHCoefFragmentAnalysis phFrag = frag.getPhCoefAnalysisFragment();
-			double fragDuration = frag.getDuration();
+			PHCoefFragmentAnalysisAlgo phFrag = frag.getPhCoefAnalysisFragment();
+			FragmentDataTime fragDataTime = frag.getFragmentDataTime();
+
 			int fragLen = frag.getFragmentLen();
-			int currEndIndex = currStartIndex + fragLen;
 			
 			int harmonicCount = phFrag.getSortedCoefEntries().length;
 			
 			phFrag.getReconstructedMainHarmonics(harmonicCount, 
-					currStartIndex, currEndIndex, currStartTime, dt, 
-					synthData, null);
+					fragDataTime, 0, fragLen,   
+					synthData, currStartIndex,
+					null);
 			
-			currStartIndex = currEndIndex;
-			currStartTime += fragDuration;
+			currStartIndex += frag.getFragmentLen();
 		}
 
 		model.setAudioDataAsDouble(synthData);

@@ -1,6 +1,7 @@
-package fr.an.tests.sound.testfft.sfft;
+package fr.an.tests.sound.testfft.math.fft;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
+import fr.an.tests.sound.testfft.algos.sfft.FFTCoefEntry;
 
 public class FFT {
 

@@ -1,4 +1,4 @@
-package fr.an.tests.sound.testfft.utils;
+package fr.an.tests.sound.testfft.ui.utils;
 
 import org.jfree.data.xy.DefaultXYDataset;
 
