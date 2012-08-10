@@ -62,7 +62,7 @@ public class PiecewiseQuadFragmentTimesFunc extends FragmentTimesFunc {
 		int compactIndex=0;
 
 		// time before first pieceTime[0]
-		for (; i < fragmentLen; i++,compactIndex+=4) {
+		for (; i < fragmentLen; i++,compactIndex+=FragmentDataTime.INCR) {
 			double t = compactArr[compactIndex];
 			if (t >= prevTime) {
 				break;
@@ -71,7 +71,7 @@ public class PiecewiseQuadFragmentTimesFunc extends FragmentTimesFunc {
 		}
 		
 		// time in range pieceTime[0]..pieceTime[pieceTime.length-1]
-		for (; i < fragmentLen; i++,compactIndex+=4) {
+		for (; i < fragmentLen; i++,compactIndex+=FragmentDataTime.INCR) {
 			double t = compactArr[compactIndex];
 			if (t >= nextTime) {
 				// switch to next piece

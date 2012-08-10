@@ -463,7 +463,7 @@ public class PHCoefFragmentAnalysisAlgo implements SoundFragmentAnalysisAlgo {
 		
 		final int compactIndexLast = startIndexROI + 4 * (endIndexROI - startIndexROI);
 		int resultIndex = resultStartIndex;
-		for (int i = startIndexROI,compactIndex = 4*startIndexROI; compactIndex < compactIndexLast; i++,compactIndex+=4,resultIndex++) {
+		for (int i = startIndexROI,compactIndex = 4*startIndexROI; compactIndex < compactIndexLast; i++,compactIndex+=FragmentDataTime.INCR,resultIndex++) {
 			double tmpapprox = 0;
 			for (int ph = 0; ph < maxPHCount; ph++) {
 				PHCoefEntry e = sortedCoefEntries[ph];

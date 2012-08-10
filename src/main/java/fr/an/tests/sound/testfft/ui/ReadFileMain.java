@@ -93,7 +93,7 @@ public class ReadFileMain {
 			double currStartTime = 0.0;
 			for (int i = 0; i < synthFragmentsCount; i++) {
 				double currEndTime = currStartTime + fragmentDuration;
-				FragmentDataTime fragmentDataTime = new FragmentDataTime(fragmentLen, currStartTime, currEndTime, null, null);
+				FragmentDataTime fragmentDataTime = new FragmentDataTime(fragmentLen, currStartTime, currEndTime, null, null, null);
 
 				SoundFragmentAnalysis frag = new SoundFragmentAnalysis(model, fragmentDataTime, fft);
 				fragments[i] = frag;
@@ -123,7 +123,7 @@ public class ReadFileMain {
 			double currStartTime = 0.0;
 			for (int i = 0; i < synthFragmentsCount; i++) {
 				double currEndTime = currStartTime + fragmentDuration;
-				FragmentDataTime fragmentDataTime = new FragmentDataTime(fragmentLen, currStartTime, currEndTime, null, null);
+				FragmentDataTime fragmentDataTime = new FragmentDataTime(fragmentLen, currStartTime, currEndTime, null, null, null);
 				
 				SoundFragmentAnalysis frag = new SoundFragmentAnalysis(model, fragmentDataTime, fft);
 				fragments[i] = frag;

@@ -32,9 +32,9 @@ public class FFTQuadFormUtils {
 		
 		final double[] compactArray = fragmentDataTime.getCompactTimeData4Array();
 		int compactIndexLast = compactArray.length;
-		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=4) {
+		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=FragmentDataTime.INCR) {
 			double absoluteT = compactArray[compactIndex];
-			double dataT = compactArray[compactIndex+2];
+			double dataT = compactArray[compactIndex + FragmentDataTime.OFFSET_DATA];
 			// r = data[i] - a.cos(omega.t + phi)
 			//   = data[i] - a.cos((omega0 + domega).t + (phi0+dphi))
 			//   = data[i] - a.[ cos(omega0.t + phi0)) cos(domega.t + dphi)
@@ -124,9 +124,9 @@ public class FFTQuadFormUtils {
 		
 		final double[] compactArray = fragmentDataTime.getCompactTimeData4Array();
 		int compactIndexLast = compactArray.length;
-		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=4) {
+		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=FragmentDataTime.INCR) {
 			double absoluteT = compactArray[compactIndex];
-			double dataT = compactArray[compactIndex+2];
+			double dataT = compactArray[compactIndex + FragmentDataTime.OFFSET_DATA];
 			
 			// r = data[i] - a0.cos(omega0.t + phi)
 			//   = data[i] - a0.cos(omega0.t + (phi0+dphi))
@@ -176,9 +176,9 @@ public class FFTQuadFormUtils {
 		
 		final double[] compactArray = dataTime.getCompactTimeData4Array();
 		final int compactIndexLast = compactArray.length;
-		for (int compactIndex=0; compactIndex < compactIndexLast; compactIndex+=4) {
+		for (int compactIndex=0; compactIndex < compactIndexLast; compactIndex+=FragmentDataTime.INCR) {
 			double absoluteT = compactArray[compactIndex];
-			double dataT = compactArray[compactIndex + 2];
+			double dataT = compactArray[compactIndex + FragmentDataTime.OFFSET_DATA];
 			
 			// r = data[t] - a.cos(omega.t + phi)
 			double cosw0tp = Math.cos(omega0 * absoluteT + phi0);
@@ -205,9 +205,9 @@ public class FFTQuadFormUtils {
 		for (int k = 1; k < K; k++) {
 			resultFourierSubCoefs[k] = 0.0;
 		}
-		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=4) {
+		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=FragmentDataTime.INCR) {
 			double absoluteT = compactArray[compactIndex];
-			double dataT = compactArray[compactIndex+2];
+			double dataT = compactArray[compactIndex+FragmentDataTime.OFFSET_DATA];
 
 			// r = data[i] - a.cos(omega.t + phi)
 			for (int k = 1; k < K; k++) {

@@ -130,7 +130,7 @@ public class FFTCoefFragmentAnalysisAlgo implements SoundFragmentAnalysisAlgo {
 			ResiduInfo residuInfo) {
 		int resultIndex = resultStartIndex;
 		final double[] compactArray = fragDataTime.getCompactTimeData4Array();
-		for (int i = startIndexROI,compactIndex = 4*startIndexROI; i < endIndexROI; i++,compactIndex+=4,resultIndex++) {
+		for (int i = startIndexROI,compactIndex = FragmentDataTime.INCR*startIndexROI; i < endIndexROI; i++,compactIndex+=FragmentDataTime.INCR,resultIndex++) {
 			double tmpapprox = 0;
 			double absoluteT = compactArray[compactIndex];
 			for (int k = 0; k < harmonicCount; k++) {

@@ -19,16 +19,16 @@ public class PiecewiseQuadFragmentTimesFuncTest {
 		double[] pieceValue = new double[] { startValue, endValue };
 		double[] pieceQuadMidValue = null;
 		
-		FragmentDataTime fragment = new FragmentDataTime(fragmentLen, startTime, endTime, null, null);
+		FragmentDataTime fragment = new FragmentDataTime(fragmentLen, startTime, endTime, null, null, null);
 		
 		PiecewiseQuadFragmentTimesFunc func = new PiecewiseQuadFragmentTimesFunc(
 				pieceTime, pieceValue, pieceQuadMidValue, fragment);
 
 		double[] result = new double[fragmentLen];
 		double[] compactTime4Array = fragment.getCompactTimeData4Array();
-		for (int i = 0,compactIndex = 0; i < fragmentLen; i++,compactIndex+=4) {
+		for (int i = 0,compactIndex = 0; i < fragmentLen; i++,compactIndex+=FragmentDataTime.INCR) {
 			double t = compactTime4Array[compactIndex];
-			double ht = compactTime4Array[compactIndex + 1];
+			double ht = compactTime4Array[compactIndex + FragmentDataTime.OFFSET_HOMOGENEOUSTIME];
 			
 			result[i] = func.eval(fragment, i, t, ht);
 		}
@@ -52,16 +52,16 @@ public class PiecewiseQuadFragmentTimesFuncTest {
 		int fragmentLen = 8;
 		double startTime = -1.0;
 		double endTime = 2.5;
-		FragmentDataTime fragment = new FragmentDataTime(fragmentLen, startTime, endTime, null, null);
+		FragmentDataTime fragment = new FragmentDataTime(fragmentLen, startTime, endTime, null, null, null);
 		
 		PiecewiseQuadFragmentTimesFunc func = new PiecewiseQuadFragmentTimesFunc(
 				pieceTime, pieceValue, pieceQuadMidValue, fragment);
 
 		double[] result = new double[fragmentLen];
 		double[] compactTime4Array = fragment.getCompactTimeData4Array();
-		for (int i = 0,compactIndex = 0; i < fragmentLen; i++,compactIndex+=4) {
+		for (int i = 0,compactIndex = 0; i < fragmentLen; i++,compactIndex+=FragmentDataTime.INCR) {
 			double t = compactTime4Array[compactIndex];
-			double ht = compactTime4Array[compactIndex + 1];
+			double ht = compactTime4Array[compactIndex + FragmentDataTime.OFFSET_HOMOGENEOUSTIME];
 			
 			result[i] = func.eval(fragment, i, t, ht);
 		}
@@ -94,16 +94,16 @@ public class PiecewiseQuadFragmentTimesFuncTest {
 		double[] pieceValue = new double[] { startValue, endValue };
 		double[] pieceQuadMidValue = new double[] { midValue, Double.NaN };
 		
-		FragmentDataTime fragment = new FragmentDataTime(fragmentLen, startTime, endTime, null, null);
+		FragmentDataTime fragment = new FragmentDataTime(fragmentLen, startTime, endTime, null, null, null);
 		
 		PiecewiseQuadFragmentTimesFunc func = new PiecewiseQuadFragmentTimesFunc(
 				pieceTime, pieceValue, pieceQuadMidValue, fragment);
 
 		double[] result = new double[fragmentLen];
 		double[] compactTime4Array = fragment.getCompactTimeData4Array();
-		for (int i = 0,compactIndex = 0; i < fragmentLen; i++,compactIndex+=4) {
+		for (int i = 0,compactIndex = 0; i < fragmentLen; i++,compactIndex+=FragmentDataTime.INCR) {
 			double t = compactTime4Array[compactIndex];
-			double ht = compactTime4Array[compactIndex + 1];
+			double ht = compactTime4Array[compactIndex + FragmentDataTime.OFFSET_HOMOGENEOUSTIME];
 			
 			result[i] = func.eval(fragment, i, t, ht);
 		}

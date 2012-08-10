@@ -20,7 +20,6 @@ import fr.an.tests.sound.testfft.algos.sfft.FFTCoefEntry;
 import fr.an.tests.sound.testfft.algos.sfft.FFTCoefFragmentAnalysisAlgo;
 import fr.an.tests.sound.testfft.math.fft.FFT;
 import fr.an.tests.sound.testfft.math.func.FragmentDataTime;
-import fr.an.tests.sound.testfft.math.func.FragmentTimesFunc;
 import fr.an.tests.sound.testfft.utils.ResiduInfo;
 
 public class SoundAnalysis {
@@ -202,11 +201,12 @@ public class SoundAnalysis {
 		int currStartIndex = 0;
 		double currStartTime = 0.0; 
 		for (int i = 0; i < fragmentsCount; i++) {
+			// TODO ARNAUD ... add overlapping data before/after ROI (with coefficient<1.0)
 			double[] fragmentData = new double[fragmentLen];
 			System.arraycopy(audioDataAsDouble, currStartIndex, fragmentData, 0, fragmentLen);
 
 			double currEndTime = currStartTime + fragmentDuration;
-			FragmentDataTime fragDataTime = new FragmentDataTime(fragmentLen, currStartTime, currEndTime, fragmentData, null); 
+			FragmentDataTime fragDataTime = new FragmentDataTime(fragmentLen, currStartTime, currEndTime, fragmentData, null, null); 
 			
 			SoundFragmentAnalysis frag = new SoundFragmentAnalysis(this, fragDataTime, fft);
 			frag.setData(fragmentData);

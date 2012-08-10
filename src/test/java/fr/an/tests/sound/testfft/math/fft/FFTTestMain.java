@@ -35,7 +35,7 @@ public class FFTTestMain
         model.setFrameRate(frameRate);
         model.setAudioDataAsDouble(data);
         
-        FragmentDataTime fragDataTime = new FragmentDataTime(fragmentLen, 0.0, duration, null, null); 
+        FragmentDataTime fragDataTime = new FragmentDataTime(fragmentLen, 0.0, duration, null, null, null); 
         SoundFragmentAnalysis frag = new SoundFragmentAnalysis(model, fragDataTime, fft); 
         FFTCoefFragmentAnalysisAlgo fftFragAnalysis = new FFTCoefFragmentAnalysisAlgo(frag, fft);
         double Period = 2*Math.PI;

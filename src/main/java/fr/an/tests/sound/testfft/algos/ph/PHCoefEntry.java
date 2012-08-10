@@ -134,7 +134,7 @@ public class PHCoefEntry {
 			) {
 		IntermediateTParams itparams = new IntermediateTParams(this);
 		int resultIndex = resultStartOffset;
-		for (int index = fragStartROI, compactIndex = 4*fragStartROI; index < fragEndROI; index++,compactIndex+=4,resultIndex++) {
+		for (int index = fragStartROI, compactIndex = 4*fragStartROI; index < fragEndROI; index++,compactIndex+=FragmentDataTime.INCR,resultIndex++) {
 			itparams.setPrecomputeForT(fragDataTime, index, compactIndex);
 			
 			result[resultIndex] = computeValue(itparams);
@@ -147,11 +147,11 @@ public class PHCoefEntry {
 		double varRes = 0.0;
 		IntermediateTParams itparams = new IntermediateTParams(this);
 		final double[] compactArray = fragDataTime.getCompactTimeData4Array();
-		for (int index = fragStartROI, compactIndex = 4*fragStartROI; index < fragEndROI; index++,compactIndex+=4) {
+		for (int index = fragStartROI, compactIndex = 4*fragStartROI; index < fragEndROI; index++,compactIndex+=FragmentDataTime.INCR) {
 			itparams.setPrecomputeForT(fragDataTime, index, compactIndex);
 
 			double value = computeValue(itparams);
-			double dataT = compactArray[compactIndex + 2];
+			double dataT = compactArray[compactIndex + FragmentDataTime.OFFSET_DATA];
 			double err = dataT - value; 
 			varRes += err * err;
 		}
@@ -164,11 +164,11 @@ public class PHCoefEntry {
 		IntermediateTParams itparams = new IntermediateTParams(this);
 		final double[] compactArray = fragDataTime.getCompactTimeData4Array();
 		int resultIndex = resultStartIndex;
-		for (int index = fragStartROI, compactIndex = 4*fragStartROI; index < fragEndROI; index++,compactIndex+=4,resultIndex++) {
+		for (int index = fragStartROI, compactIndex = 4*fragStartROI; index < fragEndROI; index++,compactIndex+=FragmentDataTime.INCR,resultIndex++) {
 			itparams.setPrecomputeForT(fragDataTime, index, compactIndex);
 
 			double value = computeValue(itparams);
-			double dataT = compactArray[compactIndex + 2];
+			double dataT = compactArray[compactIndex + FragmentDataTime.OFFSET_DATA];
 			double err = dataT - value;
 			resultResidu[resultIndex] = err;
 			varRes += err * err; 
@@ -379,7 +379,7 @@ public class PHCoefEntry {
 
 			double[] compactArray = fragDataTime.getCompactTimeData4Array();
 			double absoluteT = compactArray[compactIndex]; 
-			double ht = compactArray[compactIndex+1];
+			double ht = compactArray[compactIndex+FragmentDataTime.OFFSET_HOMOGENEOUSTIME];
 			
 			this.absoluteT = absoluteT;
 			this.ht = ht;
