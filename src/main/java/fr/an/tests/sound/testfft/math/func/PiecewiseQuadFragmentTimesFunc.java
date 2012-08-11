@@ -56,7 +56,7 @@ public class PiecewiseQuadFragmentTimesFunc extends FragmentTimesFunc {
 		double currBeta = 0.0;
 		double inv_currTimeRange = 0.0;
 		
-		double[] compactArr = fragment.getCompactTimeData4Array();
+		double[] compactArr = fragment.getTimeDataArray();
 
 		int i = 0;
 		int compactIndex=0;

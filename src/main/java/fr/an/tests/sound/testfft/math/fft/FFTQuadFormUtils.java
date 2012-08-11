@@ -30,7 +30,7 @@ public class FFTQuadFormUtils {
 		double checkWithDPhi= 0.001;
 		
 		
-		final double[] compactArray = fragmentDataTime.getCompactTimeData4Array();
+		final double[] compactArray = fragmentDataTime.getTimeDataArray();
 		int compactIndexLast = compactArray.length;
 		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=FragmentDataTime.INCR) {
 			double absoluteT = compactArray[compactIndex];
@@ -122,7 +122,7 @@ public class FFTQuadFormUtils {
 		double tmp_coefSin_div2 = 0.0;
 		double tmp_coefConst = 0.0;
 		
-		final double[] compactArray = fragmentDataTime.getCompactTimeData4Array();
+		final double[] compactArray = fragmentDataTime.getTimeDataArray();
 		int compactIndexLast = compactArray.length;
 		for (int compactIndex = 0; compactIndex < compactIndexLast; compactIndex+=FragmentDataTime.INCR) {
 			double absoluteT = compactArray[compactIndex];
@@ -174,7 +174,7 @@ public class FFTQuadFormUtils {
 			final double a0, final double omega0, final double phi0) {
 		double res = 0.0;
 		
-		final double[] compactArray = dataTime.getCompactTimeData4Array();
+		final double[] compactArray = dataTime.getTimeDataArray();
 		final int compactIndexLast = compactArray.length;
 		for (int compactIndex=0; compactIndex < compactIndexLast; compactIndex+=FragmentDataTime.INCR) {
 			double absoluteT = compactArray[compactIndex];
@@ -199,7 +199,7 @@ public class FFTQuadFormUtils {
 			double[] resultFourierSubCoefs) {
 		final int K = resultFourierSubCoefs.length;
 
-		final double[] compactArray = fragmentDataTime.getCompactTimeData4Array();
+		final double[] compactArray = fragmentDataTime.getTimeDataArray();
 		int compactIndexLast = compactArray.length;
 
 		for (int k = 1; k < K; k++) {

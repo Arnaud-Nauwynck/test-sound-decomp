@@ -11,6 +11,7 @@ import fr.an.tests.sound.testfft.SoundFragmentAnalysisAlgo;
 import fr.an.tests.sound.testfft.algos.ph.PHCoefEntry.IntermediateTParams;
 import fr.an.tests.sound.testfft.algos.sfft.FFTCoefEntry;
 import fr.an.tests.sound.testfft.algos.sfft.FFTCoefFragmentAnalysisAlgo;
+import fr.an.tests.sound.testfft.math.WindowAverageUtils;
 import fr.an.tests.sound.testfft.math.fft.FFT;
 import fr.an.tests.sound.testfft.math.fft.FFTQuadFormUtils;
 import fr.an.tests.sound.testfft.math.func.CosSinPolynom2;
@@ -25,6 +26,7 @@ public class PHCoefFragmentAnalysisAlgo implements SoundFragmentAnalysisAlgo {
 	private static boolean DEBUG = true;
 	private static boolean DEBUG_CHEAT_440 = false;
 
+	private static int runningWindowSize = 128;
 	private static boolean adjustPhi = true;
 	
 	private static boolean adjustOmegaHeuristicNeighboor = false;
@@ -39,12 +41,14 @@ public class PHCoefFragmentAnalysisAlgo implements SoundFragmentAnalysisAlgo {
 	
 	private SoundFragmentAnalysis fragment;
 	
-	private static final int MAX_PH_COEF_LEN = 10;
+	private static final int MAX_PH_COEF_LEN = 8;
 	
 	private PHCoefEntry[] sortedCoefEntries;
 //	private double cumulatedSquareNorm;
 //	private double[] residuSquareNorm;
 
+	// only 1 base running average in current impl (not recomputed for sub-harmonics)
+	RunningAverageEntry runningAverageEntry;
 	
 	// ------------------------------------------------------------------------
 
@@ -106,6 +110,13 @@ public class PHCoefFragmentAnalysisAlgo implements SoundFragmentAnalysisAlgo {
 			debugPrinter.println("residu var0:" + var0);
 		}
 		
+		this.runningAverageEntry = new RunningAverageEntry(fragmentLen);
+		WindowAverageUtils.computeAverage(fragment.getFragmentDataTime(), runningWindowSize, 
+				runningAverageEntry.getRunningWindowAmplitude(), runningAverageEntry.getRunningWindowAverage());
+		if (debugPrinter != null) {
+			debugPrinter.println("computed running window average.. ");
+		}
+		// TODO compress data for runningAverageEntry (compute N line breaks..)
 		
 		
 		for (int i = 0; i < MAX_PH_COEF_LEN; i++) {
@@ -425,7 +436,9 @@ public class PHCoefFragmentAnalysisAlgo implements SoundFragmentAnalysisAlgo {
 				debugPrinter.println("end step PH coef[" + i + "], residu var=" + var + "\n");
 			}
 			coefEntries.add(currCoefEntry);
-		}
+			
+		} //for i < MAX_PH_COEF_LEN
+		
 		sortedCoefEntries = coefEntries.toArray(new PHCoefEntry[coefEntries.size()]);
 	}
 
@@ -461,9 +474,9 @@ public class PHCoefFragmentAnalysisAlgo implements SoundFragmentAnalysisAlgo {
 			it_ph[ph] = new IntermediateTParams(e);
 		}
 		
-		final int compactIndexLast = startIndexROI + 4 * (endIndexROI - startIndexROI);
+		final int compactIndexLast = startIndexROI + FragmentDataTime.INCR * (endIndexROI - startIndexROI);
 		int resultIndex = resultStartIndex;
-		for (int i = startIndexROI,compactIndex = 4*startIndexROI; compactIndex < compactIndexLast; i++,compactIndex+=FragmentDataTime.INCR,resultIndex++) {
+		for (int i = startIndexROI,compactIndex = FragmentDataTime.INCR*startIndexROI; compactIndex < compactIndexLast; i++,compactIndex+=FragmentDataTime.INCR,resultIndex++) {
 			double tmpapprox = 0;
 			for (int ph = 0; ph < maxPHCount; ph++) {
 				PHCoefEntry e = sortedCoefEntries[ph];
@@ -483,4 +496,18 @@ public class PHCoefFragmentAnalysisAlgo implements SoundFragmentAnalysisAlgo {
 //		residuInfo.totalSquareNormCoef = ;
 	}
 
+	public void getReconstructedRunningWindowHighLow( 
+			FragmentDataTime fragDataTime, int startIndexROI, int endIndexROI, 
+			double[] resultRunningWindowHigh, double[] resultRunningWindowLow, final int resultStartIndex
+			) {
+		double[] ampl = runningAverageEntry.getRunningWindowAmplitude();
+		double[] avg = runningAverageEntry.getRunningWindowAverage();
+		
+		int resultIndex = resultStartIndex;
+		for (int i = startIndexROI; i < endIndexROI; i++,resultIndex++) {
+			resultRunningWindowHigh[resultIndex] = avg[i] + 2*ampl[i]; 
+			resultRunningWindowLow[resultIndex] = avg[i] - 2*ampl[i];
+		}
+	}
+	
 }

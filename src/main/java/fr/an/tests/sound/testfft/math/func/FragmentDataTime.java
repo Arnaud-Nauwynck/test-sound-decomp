@@ -23,7 +23,7 @@ public class FragmentDataTime {
 	 *  [5*k + 3] => coefTimeData
 	 *  [5*k + 4] => localAmplitude
 	 */
-	private double[] compactTimeData4Array;
+	private double[] timeDataArray;
 
 	public static final int OFFSET_TIME = 0;
 	public static final int OFFSET_HOMOGENEOUSTIME = 1;
@@ -53,9 +53,9 @@ public class FragmentDataTime {
 				src.startTimeROI, src.endTimeROI, src.startIndexROI, src.endIndexROI,
 				null, null, null);
 		for (int i = 0,compactIndex = 0; i < fragmentLen; i++,compactIndex+=FragmentDataTime.INCR) {
-			compactTimeData4Array[compactIndex + OFFSET_DATA] = (data != null)? data[i] : 0.0;
-			compactTimeData4Array[compactIndex + OFFSET_COEF_TIME] = src.compactTimeData4Array[compactIndex + OFFSET_COEF_TIME];
-			compactTimeData4Array[compactIndex + OFFSET_LOCAL_AMPLITUDE] = src.compactTimeData4Array[compactIndex + OFFSET_LOCAL_AMPLITUDE];
+			timeDataArray[compactIndex + OFFSET_DATA] = (data != null)? data[i] : 0.0;
+			timeDataArray[compactIndex + OFFSET_COEF_TIME] = src.timeDataArray[compactIndex + OFFSET_COEF_TIME];
+			timeDataArray[compactIndex + OFFSET_LOCAL_AMPLITUDE] = src.timeDataArray[compactIndex + OFFSET_LOCAL_AMPLITUDE];
 		}
 	}
 	
@@ -75,15 +75,15 @@ public class FragmentDataTime {
 		this.startIndexROI = startIndexROI;
 		this.endIndexROI = endIndexROI;
 		
-		this.compactTimeData4Array = new double[INCR*fragmentLen];
+		this.timeDataArray = new double[INCR*fragmentLen];
 		final double dt = (endTime - startTime) / fragmentLen;
 		final double dht = 2.0 / fragmentLen;
 		for (int i = 0,compactIndex = 0; i < fragmentLen; i++,compactIndex+=INCR) {
-			compactTimeData4Array[compactIndex] = startTime + i * dt;
-			compactTimeData4Array[compactIndex + OFFSET_HOMOGENEOUSTIME] = -1.0 + i * dht;
-			compactTimeData4Array[compactIndex + OFFSET_DATA] = (data != null)? data[i] : 0.0;
-			compactTimeData4Array[compactIndex + OFFSET_COEF_TIME] = (coefTimeData != null)? coefTimeData[i] : 0.0;
-			compactTimeData4Array[compactIndex + OFFSET_LOCAL_AMPLITUDE] = (localAmplitudeData != null)? localAmplitudeData[i] : 0.0;
+			timeDataArray[compactIndex] = startTime + i * dt;
+			timeDataArray[compactIndex + OFFSET_HOMOGENEOUSTIME] = -1.0 + i * dht;
+			timeDataArray[compactIndex + OFFSET_DATA] = (data != null)? data[i] : 0.0;
+			timeDataArray[compactIndex + OFFSET_COEF_TIME] = (coefTimeData != null)? coefTimeData[i] : 0.0;
+			timeDataArray[compactIndex + OFFSET_LOCAL_AMPLITUDE] = (localAmplitudeData != null)? localAmplitudeData[i] : 0.0;
 		}
 	}
 
@@ -117,8 +117,8 @@ public class FragmentDataTime {
 		return fragmentLen;
 	}
 
-	public double[] getCompactTimeData4Array() {
-		return compactTimeData4Array;
+	public double[] getTimeDataArray() {
+		return timeDataArray;
 	}
 
 	// ------------------------------------------------------------------------

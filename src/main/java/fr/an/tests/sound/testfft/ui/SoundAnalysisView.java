@@ -68,7 +68,10 @@ public class SoundAnalysisView {
 
 	private double[] approxDataPH;
 	private double[] residualDataPH;
-
+	
+	private double[] runningWindowHigh;
+	private double[] runningWindowLow;
+	
 	
 //	private JSpinner mainHarmonicCountSpinner;
 	private JSlider mainHarmonicCountSlider;
@@ -95,19 +98,25 @@ public class SoundAnalysisView {
 
 		this.approxDataPH = new double[frameLength];
 		this.residualDataPH = new double[frameLength];
+		
+		this.runningWindowHigh = new double[frameLength];
+		this.runningWindowLow = new double[frameLength];
 
         { // mainChartPanel + reconstructed
         	this.mainDataset = new DefaultXYDataset();
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "raw", xData, model.getAudioDataAsDouble());
+			
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "approx", xData, approxData);
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "residu", xData, residualData);
 
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "approxPH", xData, approxDataPH);
 			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "residuPH", xData, residualDataPH);
 
+			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "avg-High", xData, runningWindowHigh);
+			JFreeChartUtils.addDefaultXYDatasetSerie(mainDataset, "avg-Low", xData, runningWindowLow);
 			
 			// JFreeChart
-	        this.mainChart = ChartFactory.createXYLineChart(model.getName(), "time", "amplitude", mainDataset, true);
+	        this.mainChart = ChartFactory.createXYLineChart(model.getName(), "time", "signals", mainDataset, true);
 
 	        mainChart.addChangeListener(new ChartChangeListener() {
 				public void chartChanged(ChartChangeEvent event) {
@@ -293,9 +302,19 @@ public class SoundAnalysisView {
         vertSplit.setDividerLocation(400);
         
         // this.tabbedPane.invalidate(); //?? 
+        updateMainData();
         updateReconstData();
 	}
 
+	private void updateMainData() {
+		int frameLength = model.getFrameLength();
+		model.getReconstructedRunningWindowHighLow(0, frameLength,  
+				runningWindowHigh, runningWindowLow);
+
+		mainDataset.seriesChanged(null);
+		// residuDataset.seriesChanged(null);
+
+	}
 	
 	private void updateReconstData() {
 		int harmonicCount = (Integer) mainHarmonicCountSlider.getValue();

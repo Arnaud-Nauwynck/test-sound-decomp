@@ -270,6 +270,32 @@ public class SoundAnalysis {
 	    sourceDataLine.close();
 	}
 
+	public void getReconstructedRunningWindowHighLow(
+		int startIndex, int endIndex, 	
+		double[] resultRunningWindowHigh, double[] resultRunningWindowLow) {
+		int fragmentsCount = fragments.length;
+		
+		int fragIndex = 0;
+		int currStartIndex = 0;
+
+		for (; fragIndex < fragmentsCount; fragIndex++) {
+			SoundFragmentAnalysis frag = fragments[fragIndex];
+			FragmentDataTime fragDataTime = frag.getFragmentDataTime();
+			
+			PHCoefFragmentAnalysisAlgo phFrag = frag.getPhCoefAnalysisFragment();
+
+			int fragStartIndexROI = fragDataTime.getStartIndexROI();
+			int fragEndIndexROI = fragDataTime.getEndIndexROI();
+
+			phFrag.getReconstructedRunningWindowHighLow( 
+					fragDataTime, fragStartIndexROI, fragEndIndexROI,  
+					resultRunningWindowHigh, resultRunningWindowLow, currStartIndex);
+			
+			currStartIndex += (fragEndIndexROI - fragStartIndexROI);
+		}
+
+	}
+		
 	public void getReconstructedMainHarmonics(int harmonicCount, 
 			int startIndex, int endIndex, 	
 			double[] approxData, 

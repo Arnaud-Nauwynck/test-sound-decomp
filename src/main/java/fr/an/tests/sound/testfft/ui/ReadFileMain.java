@@ -28,7 +28,7 @@ public class ReadFileMain {
 //		File file = new File(dir, "fl-do.wav");
 		
 		String[] fileNames = new String[] {
-//			"myriam-singing-in-the-rain.wav",
+			"myriam-singing-in-the-rain.wav",
 			// missing... "fl-do-gr.wav",
 //			"fl-re-gr.wav",
 			"fl-mi-gr.wav",
