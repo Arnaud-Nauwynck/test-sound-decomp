@@ -1,0 +1,358 @@
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{babel}
+\usepackage[retainorgcmds]{IEEEtrantools}
+
+\begin{document}
+
+\section{General Principles}
+
+Let $S(t)$ be a 1-dimensional time signal (sound) to be compressed.
+It is discretized in time by sampling at regular frequency (example 8000 Hz): $t_0, t_1 \ldots t_N$
+$t_n = t_0 + n * \tau$ ,   $\tau=1/F$ 
+
+Each signal measure $S_n=s(t_{n})$ is converted from analogic to digital, so dicretized and encoded to a fixed
+integer precision (example: 16 bits).
+
+
+\subsection{different measures of residu}
+
+
+\noindent While decomposing a signal $S$ into main components $H_k$: $S=\sum_k H_k + R$ , the residual signal $R = S -
+\sum_k H_k$ must be as small as possible: $ \lim_{k \rightarrow \infty} ||R|| = 0 $
+
+\noindent Signal Entropy:
+\begin{equation}
+E(S) = \sum_n p(S_n) log(S_n)
+\end{equation}
+where $p(S_n)$ is the probability of obtaining value $S_n$, and $log(S_n)$ is the number of bits (~log in base 2) for
+encoding value $S_n$.
+
+
+\noindent Signal Quadratic Variance:
+\begin{equation}
+Var(S) = ||S|| = \sum_n S_n^2
+\end{equation}
+Var(S) represents the norm of the signal = distance to 0. It is linked to scalar product $<f,g> = \sum_n f_n g_n$.
+
+
+\noindent Signal Absolute Area:
+\begin{equation}
+AbsArea(S) = \sum_n abs(S_n)
+\end{equation}
+AbsArea(S) represents the total area of the signal with the x-axis. 
+
+\noindent Signal Maximum Range:
+\begin{equation}
+MaxRange(S) = \max_n S_n - \min_n S_n
+\end{equation}
+MaxRange(S) represents the heigth of the horizontal band containing the signal (for a symmetric signal arround 0, it
+is the max distance to 0).
+
+
+\section{Linear Autocorrelation}
+
+$\tilde(X_t)$ linear prediction for $X_t$ knowing $X_{t-1}$: 
+\begin{equation}
+\tilde(X_t) = A X_{t-1} + B_t, 
+X_t= \left( \begin{array}{c} 
+x_t \\
+x_{t-1} \\
+\vdots \\
+x_{t-P} 
+\end{array}\right), 
+A = \left( \begin{array}{ccccc}
+  a_1 & a_2 & a_3 & \ldots & a_n\\
+  1      & 0   & \ldots \\
+  0      & 1   & 0 \\
+  \vdots &     & \ddots \\   
+\end{array} \right)
+\end{equation}
+
+The error between real and predicted value is 
+$\tilde(X_t) - X_t = \left( \begin{array}{c} 
+x_t - \sum_n a_n x_{t-n} - B_t\\
+0\\
+0\\
+0 \end{array} \right)$ 
+
+
+The quadratic error is 
+\begin{IEEEeqnarray}{rCl}
+  Q & = &  Var(\tilde(X) - X) = \sum_n (\tilde(X_n) - X_n)^2 \nonumber\\
+  & = & \sum_t (x_t - \sum_n a_n x_{t-n} - B_t) . (x_t - \sum_n a_n x_{t-n} - B_t) \nonumber\\
+  & = & \sum_t \left( (x_t-B_t)^2 
+  	-2(x_t-B_t).(\sum_n a_n x_{t-n}) 
+  	+ (\sum_{n_1} a_{n_1} x_{t-{n_1}}).(\sum_{n_2} a_{n_2} x_{t-{n_2}})
+  \right)  \nonumber\\
+  & = & \sum_{n_1,n_2} a_{n_1} a_{n_2} \left( \sum_t x_{t-n_1} x_{t-n_2} \right) \nonumber\\
+  & & -2 \sum_n a_n \left( \sum_t (x_t-B_t) x_{t-n} \right) \nonumber\\
+  & & +  \left( \sum_t (x_t-B_t)^2 \right) \nonumber\\
+\end{IEEEeqnarray}
+
+This is a quadratic form of term $a_{ij}$. 
+It can be written as 
+\begin{equation}
+Q(a) = Q^0 - 2 N^t a + a^t M a  
+\end{equation}
+
+with $M = \left( \begin{array}{cc} 
+& \vdots \\
+\ldots & \sum_t x_{t-i} x_{t-j} \\
+& \\ 
+ \end{array} \right)$
+, $N= \left( \begin{array}{c} 
+\vdots \\
+\sum_t (x_t-B_t) x_{t-i}\\
+\vdots \\
+\end{array} \right)
+$
+, $Q^0 = \sum_t (x_t-B_t)^2 $
+
+\noindent A simple linear calculation, analogue to quadratic scalar form $ax^2+bx+c$ \ldots 
+gives min for $x=-b/2a$, with value=$c-b^2/2a$. 
+
+\noindent If $M$ is inversible, the minimum of $Q(a)$ is obtained for $a= M^{-1} N$, and has value 
+$Q^0 - N^t M^{-1} N$
+\noindent If $M$ is not inversible, a similar result can be obtained with the pseudo inverse.
+
+\noindent Note that the result can be interpreted by saying that the variance has reduced by $N^t M^{-1} N$ when
+applying the autocorrelation procedure.
+  
+
+\section{Least Square Method for Harmonics Amplitude}
+
+The signal is decomposed in $K$ main harmonics, with a residu:
+$ S(t_n) = \sum_k S_k(t_n) + R(t)$
+
+We supposed we know frequencies $w_{k}$ and phases $\phi_{k}$ (example: by using zero-crossing algorithms, see next), we
+want to adjust optimal amplitude coefficient $c_k$ to miminize quadratic errors.
+
+\noindent For calculation with complex $H_k=c_k \cos(w_{k} t+\phi_{k})$ will be replaced by $H_k=c_k e^{i (w_{k}
+t+\phi_{k})}$, and $||x||^2 = x \bar{x}$
+
+\begin{IEEEeqnarray}{rCl}
+||R||^2 & = & \sum_n ||S_n - \sum_k H_k(t_n)||^2 \nonumber \\
+& = & \sum_n 
+ \left( S_n - \sum_{k_1} H_{k_1}(t_n) \right) 
+ \left( S_n - \sum_{k_2} \bar{H}_{k_2}(t_n) \right) \nonumber \\
+& = & \underbrace{\left( \sum_n S_n^2 \right)}_{c}
+ - \left( \sum_k \underbrace{\left( \sum_n S_n (H_{k} + \bar{H}_k)(t_n) \right)}_{b_k} \right)
+ + \left( \sum_{k_1,k_2} \underbrace{\sum_n H_{k_1} \bar{H}_{k_2}(t_n)}_{a_{k_1 k_2}} \right) \nonumber
+\end{IEEEeqnarray}
+
+
+\noindent Using $H_k(t_n) = c_k e^{i (w_{k} t+\phi_{k})} $
+
+\noindent it follows $ H_{k} + \bar{H}_k (t) = 2 c_k \cos(w_{k} t+\phi_{k})$ (is real, not complex), and
+$$ b_k = 2 c_k \sum_n S_n \cos(w_{k} t+\phi_{k})$$
+
+\noindent Then for $a_{k_1 k_2}$, 
+$ H_{k_1} \bar{H}_{k_2}(t) = c_{k_1} c_{k_2} e^{i ((w_{k_1} - w_{k_2}) t + (\phi_{k_1} -
+\phi_{k_2}))}$
+
+\noindent summing twice, complex part of $ \ldots(k_1-k_2) + \ldots(k_2-k_1) $ give zero  
+
+$ \frac{1}{2} ( H_{k_1} \bar{H}_{k_2} + H_{k_2} \bar{H}_{k_1}) (t) = \frac{1}{2} c_{k_1} c_{k_2} 2 \cos((w_{k_1} -
+w_{k_2}) t + (\phi_{k_1} - \phi_{k_2}))$
+
+\noindent so 
+$$ a_{k_1 k_2} = 
+c_{k_1} c_{k_2} \sum_n \cos \left((w_{k_1} - w_{k_2}) t_n + \phi_{k_1} - \phi_{k_2} \right)$$
+($a_{k_1 k_2}$ is a real symmetric positive matrix)
+
+\noindent Finally,
+\begin{equation}
+||R||^2 = \underbrace{\left( \sum_n S_n^2 \right)}_{R^0}
+ - 2 \sum_k c_k \underbrace{\left( \sum_n S_n \cos(w_{k} t+\phi_{k}) \right)}_{B_k}
+ + \sum_{k_1,k_2} c_{k_1} c_{k_2} \underbrace{\left( \sum_n \cos \left((w_{k_1} - w_{k_2}) t_n + \phi_{k_1} -
+ \phi_{k_2} \right) \right)}_{A_{k_1 k_2}}
+\end{equation}
+
+\noindent This is a quadratic form on vector variable $c_k$ :
+\begin{equation}
+||R||^2 = R^0 - 2 B^t c + c^t A c  
+\end{equation}
+
+\noindent The minimum is reached for $c = A^{-1} B$, and the minimum is $ R^0 - B^t A^{-1} B$
+
+\noindent Note that the result can be interpreted by saying that the variance has reduced by $B^t A^{-1} B$ when
+applying the least-square amplitude fitting.
+
+
+
+
+
+\section{Least Square Method for Harmonics Amplitude Linear Perturbation}
+
+The signal is decomposed in $K$ main harmonics, with a residu:
+$ S(t_n) = \sum_k S_k(t_n) + R(t)$
+
+\noindent We have known approximations for frequencies $w_{k}$, phases $\phi_{k}$ and amplitudes $c_k$.
+
+\noindent The $K^{th}$ harmonic
+$ S_{k}(t) = c_{k} \cos(w_{k} t+\phi_{k})$  
+is replaced by modifying the constant amplitude $c_k$, to obtain a ``non-periodic harmonic'':
+$c_k(t) = c_k^0 + c_k^1 (t-t_0) $ 
+
+\noindent This model is usable only for short-time interval!
+
+\noindent The calculation done in previous section is slightly modified.
+\begin{IEEEeqnarray}{rCl}
+||R||^2 &=& \left( \sum_n S_n^2 \right) \nonumber\\
+ & & - 2 \sum_k \left( \sum_n c_k(t_n) S_n \cos(w_{k} t_n+\phi_{k}) \right) \nonumber\\
+ & & + \sum_{k_1,k_2} \left( \sum_n c_{k_1}(t_n) c_{k_2}(t_n) \cos \left((w_{k_1} - w_{k_2}) t_n +
+ \phi_{k_1} -  \phi_{k_2} \right) \right) \nonumber\\
+\end{IEEEeqnarray}
+
+\noindent We want to expand $c_k(t) = c_k^0 + c_k^1 (t-t_0) $, then factorize the variance as a quadratic form on vector
+term $c_k^1$
+
+\noindent For ease of calculation, lets note 
+$ COS_{kn} = \cos(w_{k} t_n+\phi_{k}) $ 
+and 
+$ COS\Delta_{k_1 k_2 n} = \cos \left((w_{k_1} - w_{k_2}) t_n + \phi_{k_1} -  \phi_{k_2} \right) $
+
+\begin{IEEEeqnarray}{rCl}
+||R||^2 &=& \left( \sum_n S_n^2 \right) \nonumber\\
+ & & - 2 \sum_k \sum_n \left( c_k^0 + c_k^1 (t_n-t_0)) S_n COS_{kn} \right) \nonumber\\
+ & & + \sum_{k_1,k_2} \left( \sum_n (c_{k_1}^0 + c_{k_1}^1 (t_n-t_0)) (c_{k_2}^0 + c_{k_2}^1 (t_n-t_0)) 
+   COS\Delta_{k_1 k_2 n} \right) \nonumber\\
+&=& \sum_n S_n^2  \nonumber\\
+ & & - 2 \sum_k c_k^0 \sum_n S_n COS_{kn}
+ - 2 \sum_k c_k^1 \left( \sum_n (t_n-t_0) S_n COS_{kn} \right) \nonumber\\
+ & & + \sum_{k_1,k_2} 
+    \left( \sum_n 
+	 	\left( c_{k_1}^0 c_{k_2}^0 
+		 	+ (c_{k_1}^0 c_{k_2}^1 + c_{k_1}^1 c_{k_2}^0 ) (t_n-t_0) 
+		 	+ c_{k_1}^1 c_{k_2}^1 (t_n-t_0)^2 
+	 	\right) 
+	   COS\Delta_{k_1 k_2 n} 
+   \right) \nonumber\\
+&=& \sum_n S_n^2  \nonumber\\
+ & & - 2 \sum_k c_k^0 \sum_n S_n COS_{kn}
+ - 2 \sum_k c_k^1 \left( \sum_n (t_n-t_0) S_n COS_{kn} \right) \nonumber\\
+ & & + \sum_{k_1,k_2} 
+    \left( \sum_n 
+	 	\left( c_{k_1}^0 c_{k_2}^0 \right) 
+	   COS\Delta_{k_1 k_2 n} 
+   \right) \nonumber\\
+ & & + \sum_{k_1,k_2} 
+    \left( \sum_n
+    	\underbrace{(c_{k_1}^0 c_{k_2}^1 + c_{k_1}^1 c_{k_2}^0 )}_{= 2 c_{k_1}^1 c_{k_2}^0} (t_n-t_0)
+	   COS\Delta_{k_1 k_2 n} 
+   \right) \nonumber\\
+ & & + \sum_{k_1,k_2} 
+    \left( \sum_n 
+	 	\left( c_{k_1}^1 c_{k_2}^1 (t_n-t_0)^2 
+	 	\right) 
+	   COS\Delta_{k_1 k_2 n} 
+   \right) \nonumber\\
+\end{IEEEeqnarray}
+
+Then\ldots
+
+\begin{IEEEeqnarray}{rCl}
+||R||^2 &=& 
+ \underbrace{\left( 
+ 	\sum_n S_n^2
+    - 2 \sum_k c_k^0 \sum_n S_n COS_{kn}
+    + \sum_{k_1,k_2} c_{k_1}^0 c_{k_2}^0 \sum_n COS\Delta_{k_1 k_2 n} \right)}_{R^0} \nonumber\\
+ & & 
+ - 2 \sum_k c_k^1 
+ 	\underbrace{\left( 
+ 		\sum_n (t_n-t_0) S_n COS_{kn} 
+	    - \sum_{k_2} c_{k_2}^0 \sum_n (t_n-t_0) COS\Delta_{k k_2 n}
+ 	\right)}_{B_k} \nonumber\\
+ & & + \sum_{k_1,k_2} 
+    c_{k_1}^1 c_{k_2}^1
+    \underbrace{\left( \sum_n 
+	 	\left( (t_n-t_0)^2 
+	 	\right) 
+	   COS\Delta_{k_1 k_2 n} 
+   \right)}_{A_{k_1 k_2}} \nonumber\\
+\end{IEEEeqnarray}
+
+\noindent Finally,
+\begin{equation}
+||R||^2 = R^0 -2 B^t c^1 + (c^1)^t A (c^1)
+\end{equation}
+
+\noindent The minimum is reached for $c^1 = A^{-1} B$, and the minimum is $ R^0 - B^t A^{-1} B$
+
+\noindent Note that the result can be interpreted by saying that the variance has reduced by $B^t A^{-1} B$ when
+applying the least-square amplitude linear perturbation procedure.
+
+
+\section{Least Square Method for Harmonics Frequency Linear Perturbation}
+
+The signal is decomposed in $K$ main harmonics, with a residu:
+$ S(t_n) = \sum_k S_k(t_n) + R(t)$
+
+\noindent The $K^{th}$ harmonic
+$ S_{k}(t) = c_{k} cos(w_{k} t+\phi_{k})$  with $c_k >= 0$, $\phi_k \in [-\pi,\pi]$
+is replaced by modifying the constant frequency $w_k$, to obtain a ``non-periodic harmonic'':
+$ w_k(t) = w_k^0 + w_k^1 (t-t_0) $
+(or ease of writing, $t_0 = 0$ \ldots which is a change in $t$ origin). 
+
+\noindent This model is usable only for short-time interval!
+
+\noindent The calculation done in previous section is slightly modified.
+\begin{IEEEeqnarray}{rCl}
+||R||^2 &=& \left( \sum_n S_n^2 \right) \nonumber\\
+ & & - 2 \sum_k \left( \sum_n c_k S_n \cos(w_{k}(t_n) t_n+\phi_{k}) \right) \nonumber\\
+ & & + \sum_{k_1,k_2} \left( \sum_n c_{k_1} c_{k_2} \cos \left((w_{k_1}(t_n) - w_{k_2}(t_n)) t_n +
+ \phi_{k_1} -  \phi_{k_2} \right) \right) \nonumber\\
+\end{IEEEeqnarray}
+
+
+\noindent Developping trigonometric formula $ \cos(a+b) = \cos(a)cos(b) - \sin(a)\sin(b) $, for expanding $ w_k(t)$, we
+get
+
+\begin{IEEEeqnarray}{rCl}
+\cos(w_{k}(t_n) t_n+\phi_{k}) &=& \cos( (w_k^0 + w_k^1 t_n ) t_n +\phi_{k})  \nonumber\\
+ &=&  \cos( (w_k^0 t_n +\phi_{k}) +  w_k^1 t_n ) \nonumber\\
+ &=&  \cos( w_k^0 t_n +\phi_{k}) \cos(w_k^1 t_n) - \sin( w_k^0 t_n +\phi_{k}) \sin(w_k^1 t_n) \nonumber\\
+ & \approx &  \cos( w_k^0 t_n +\phi_{k}) ( 1 - 1/2(w_k^1 t_n)^2) - \sin( w_k^0 t_n +\phi_{k}) (w_k^1 t_n) \nonumber\\
+\end{IEEEeqnarray}{rCl}
+
+
+\section{Partial Derivative of Perturbation Residu}
+
+\noindent given $P$ parameters,
+$$ S_k(t_n) = A_k(t_n,p_1,p_2..p_P) sin(w_k(t_n,p_1,p_2,..p_P) t_n + \phi_{k}(t_n,p_1,p_2,..p_P))$$
+
+$A_k$, $w_k$ and $\phi_{k}$ could have the form $A_k(t,p..) = p_0 + p_1 t + p_2 t^2$. 
+For now we compute in the general case with $p$ derivatives.
+
+\begin{IEEEeqnarray}{rCl}
+E = ||R||^2 &=& \sum_n \left( S_n - \sum_k S_k(t_n, p_1, p_2, \ldots p_P)
+\right)^2 \nonumber\\
+\frac{\partial E}{\partial p_i} &=& 
+	- 2 \sum_n 
+		\left( \sum_k \frac{\partial S_k}{\partial p_i}(t_n, p_1, p_2, \ldots p_P)
+		\right) \left( S_n - \sum_k S_k(t_n, p_1, p_2, \ldots p_P) \right)
+\nonumber\\
+\end{IEEEeqnarray}
+
+
+\begin{IEEEeqnarray}{rCl}
+||R||^2 &=& \sum_n \left( S_n - A_k(t_n,p_.) sin(w_k(t_n,p_.) t_n + \phi_{k}(t_n,p_.)) \right)^2 \nonumber\\
+\frac{\partial ||R(p)||^2}{\partial p_i} &=& 
+  - 2 \sum_n \frac{\partial}{\partial p}\left( 
+  		A_k(t_n,p_.) \sin( w_k(t_n,p_.) t_n + \phi_{k}(t_n,p_.) )
+  	\right)
+  	 . \left( S_n - A_k(t_n,p_.) \sin( w_k(t_n,p_.) t_n + \phi_{k}(t_n,p_.)) \right) 
+  \nonumber \\
+ &=&  -2 \sum_n  (
+ 		\frac{\partial A_k}{\partial p}(t_n,p_.) \sin( w_k t_n + \phi_{k} )
+ 		+ A_k(t_n,p_.)
+ 		 \left( \frac{\partial w_k}{\partial p}(t_n,p_.) t_n + \frac{\partial \phi_{k}}{\partial p}(t_n,p_.) \right)
+ 		 \cos( w_k t_n + \phi_{k} )
+  	     A_k(t_n,p_.) \nonumber\\
+ & &   \qquad )   \left( S_n - A_k \sin( w_k t_n + \phi_{k} ) \right)
+\end{IEEEeqnarray}
+
+
+\end{document}

@@ -3,19 +3,26 @@
   	http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>fr.an.tests.sound</groupId>
-  <artifactId>test-fft</artifactId>
+  <groupId>fr.an.sounddecomp</groupId>
+  <artifactId>sound-decomp</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
-  <name>test-fft</name>
-  <url>http://maven.apache.org</url>
+  <name>Tests Sound Decomposition</name>
+  <url>//https://github.com/Arnaud-Nauwynck/test-sound-decomp</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <dependencies>
+  <dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>fr.an.sounddecomp</groupId>
+            <artifactId>sound-decomp-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
   	<dependency>
 	  <groupId>commons-io</groupId>
 	  <artifactId>commons-io</artifactId>
@@ -42,10 +49,25 @@
 -->  		
 
     <dependency>
+	    <groupId>com.googlecode.efficient-java-matrix-library</groupId>
+	    <artifactId>ejml</artifactId>
+	    <version>0.23</version>
+	</dependency>
+
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.10</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
+  </dependencyManagement>
+
+
+  <modules>
+     <module>sound-decomp-core</module>
+     <module>sound-decomp-ui</module>
+  </modules>
+
 </project>
