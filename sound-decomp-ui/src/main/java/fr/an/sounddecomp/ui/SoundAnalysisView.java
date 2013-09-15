@@ -3,7 +3,6 @@ package fr.an.sounddecomp.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
-import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
@@ -33,7 +32,6 @@ import org.jfree.data.Range;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import fr.an.sounddecomp.core.SoundAnalysis;
-import fr.an.sounddecomp.core.SoundFragmentAnalysis;
 import fr.an.sounddecomp.core.algos.ph.PHCoefFragmentAnalysisAlgo;
 import fr.an.sounddecomp.core.algos.sfft.FFTCoefEntry;
 import fr.an.sounddecomp.core.algos.sfft.FFTCoefFragmentAnalysisAlgo;
@@ -245,7 +243,7 @@ public class SoundAnalysisView {
 			XYPlot residualChartPlot = (XYPlot) residualChart.getPlot();
 			XYItemRenderer residualChartRenderer = residualChartPlot.getRenderer(0);
 					
-			XYPlot mainChartPlot = (XYPlot) mainChart.getPlot();
+//			XYPlot mainChartPlot = (XYPlot) mainChart.getPlot();
 //			XYItemRenderer mainChartRenderer = mainChartPlot.getRenderer();
 //
 //			XYItemRenderer mainChartFFTResidualRenderer = mainChartPlot.getRenderer(2);
