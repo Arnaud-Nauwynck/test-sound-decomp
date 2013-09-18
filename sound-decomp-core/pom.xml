@@ -9,7 +9,6 @@
    <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>fr.an.sounddecomp</groupId>
   <artifactId>sound-decomp-core</artifactId>
   <packaging>jar</packaging>
 
@@ -21,14 +20,22 @@
 	  <groupId>commons-io</groupId>
 	  <artifactId>commons-io</artifactId>
 	</dependency>
-	
+	<dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+    
   	<dependency>
-	  <groupId>net.sf.jtransforms</groupId>
-	  <artifactId>jtransforms</artifactId>
+        <groupId>net.sf.jtransforms</groupId>
+        <artifactId>jtransforms</artifactId>
   	</dependency>
 
-        <dependency>
-	    <groupId>com.googlecode.efficient-java-matrix-library</groupId>
+    <dependency>
+        <groupId>com.googlecode.efficient-java-matrix-library</groupId>
 	    <artifactId>ejml</artifactId>
 	</dependency>
 

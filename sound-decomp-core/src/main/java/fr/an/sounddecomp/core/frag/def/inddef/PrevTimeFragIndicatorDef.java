@@ -1,19 +1,21 @@
-package fr.an.sounddecomp.core.frag.inddef;
+package fr.an.sounddecomp.core.frag.def.inddef;
 
-public class PrevTimeFragmentIndicatorDef extends TimeFragmentIndicatorDef {
+import fr.an.sounddecomp.core.frag.def.TimeFragmentDefRegisty;
 
-    private final TimeFragmentIndicatorDef prevIndicatorDef;
+public class PrevTimeFragIndicatorDef extends TimeFragIndicatorDef {
+
+    private final TimeFragIndicatorDef prevIndicatorDef;
     
     // ------------------------------------------------------------------------
     
-    public PrevTimeFragmentIndicatorDef(TimeFragmentIndicatorDefRegisty owner, String name, TimeFragmentIndicatorDef prevIndicatorDef) {
+    public PrevTimeFragIndicatorDef(TimeFragmentDefRegisty owner, String name, TimeFragIndicatorDef prevIndicatorDef) {
         super(owner, name);
         this.prevIndicatorDef = prevIndicatorDef;
     }
 
     // ------------------------------------------------------------------------
 
-    public TimeFragmentIndicatorDef getPrevIndicatorDef() {
+    public TimeFragIndicatorDef getPrevIndicatorDef() {
         return prevIndicatorDef;
     }
 

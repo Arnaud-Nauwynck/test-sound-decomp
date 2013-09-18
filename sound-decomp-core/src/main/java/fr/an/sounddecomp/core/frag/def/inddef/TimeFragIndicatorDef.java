@@ -1,21 +1,23 @@
-package fr.an.sounddecomp.core.frag.inddef;
+package fr.an.sounddecomp.core.frag.def.inddef;
+
+import fr.an.sounddecomp.core.frag.def.TimeFragmentDefRegisty;
 
 
-public class TimeFragmentIndicatorDef {
+public abstract class TimeFragIndicatorDef {
 
-    private final TimeFragmentIndicatorDefRegisty owner;
+    private final TimeFragmentDefRegisty owner;
     private final String name;
     
     // ------------------------------------------------------------------------
     
-    public TimeFragmentIndicatorDef(TimeFragmentIndicatorDefRegisty owner, String name) {
+    public TimeFragIndicatorDef(TimeFragmentDefRegisty owner, String name) {
         this.owner = owner;
         this.name = name;
     }
 
     // ------------------------------------------------------------------------
 
-    public TimeFragmentIndicatorDefRegisty getOwner() {
+    public TimeFragmentDefRegisty getOwner() {
         return owner;
     }
     
