@@ -1,6 +1,6 @@
 package fr.an.sounddecomp.core.frag.indexaccessor;
 
-public class TimeFragmentIndex {
+public class TimeFragIndexRange {
 
     private int overlappedStartIndex;
     private double overlappedStartTime;
@@ -21,7 +21,7 @@ public class TimeFragmentIndex {
     
     // ------------------------------------------------------------------------
     
-    public TimeFragmentIndex(
+    public TimeFragIndexRange(
             int overlappedStartIndex, double overlappedStartTime, 
             double[] overlappedStartCoef,
             int startIndex, double startTime,

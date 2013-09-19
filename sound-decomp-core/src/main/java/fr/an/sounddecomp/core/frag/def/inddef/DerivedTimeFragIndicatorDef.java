@@ -5,22 +5,22 @@ import java.util.Collections;
 import java.util.List;
 
 import fr.an.sounddecomp.core.frag.def.TimeFragmentDefRegisty;
-import fr.an.sounddecomp.core.frag.def.functordef.TimeFragFunctorDef;
+import fr.an.sounddecomp.core.frag.def.func.TimeFragFuncDef;
 
 public class DerivedTimeFragIndicatorDef extends TimeFragIndicatorDef {
 
     private final List<TimeFragIndicatorDef> dependOf;
     
-    private final TimeFragFunctorDef evalFunctorDef;
+    private final TimeFragFuncDef evalFuncDef;
     
     // ------------------------------------------------------------------------
     
     public DerivedTimeFragIndicatorDef(TimeFragmentDefRegisty owner, String name, 
             List<TimeFragIndicatorDef> dependOf,
-            TimeFragFunctorDef evalFunctorDef) {
+            TimeFragFuncDef evalFunctorDef) {
         super(owner, name);
         this.dependOf = Collections.unmodifiableList(new ArrayList<TimeFragIndicatorDef>(dependOf));
-        this.evalFunctorDef = evalFunctorDef;
+        this.evalFuncDef = evalFunctorDef;
     }
 
     // ------------------------------------------------------------------------
@@ -29,8 +29,8 @@ public class DerivedTimeFragIndicatorDef extends TimeFragIndicatorDef {
         return dependOf;
     }
 
-    public TimeFragFunctorDef getEvalFunctorDef() {
-        return evalFunctorDef;
+    public TimeFragFuncDef getEvalFuncDef() {
+        return evalFuncDef;
     }
     
     

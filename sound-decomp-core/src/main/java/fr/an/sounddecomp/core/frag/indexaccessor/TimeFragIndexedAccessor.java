@@ -1,23 +1,23 @@
 package fr.an.sounddecomp.core.frag.indexaccessor;
 
 /**
- * Array accessor for indexing data inside a Time Serie Fragment
+ * Index accessor for accessing (getAt()/setAt()) data inside a Time Serie Fragment
  */
-public abstract class TimeFragmentDataAccessor<T> {
+public abstract class TimeFragIndexedAccessor<T> {
 
-    private TimeFragmentIndex index;
+    private TimeFragIndexRange indexRange;
     
     // ------------------------------------------------------------------------
     
-    public TimeFragmentDataAccessor(TimeFragmentIndex index) {
+    public TimeFragIndexedAccessor(TimeFragIndexRange indexRange) {
         super();
-        this.index = index;
+        this.indexRange = indexRange;
     }
 
     // ------------------------------------------------------------------------
     
-    public TimeFragmentIndex getIndex() {
-        return index;
+    public TimeFragIndexRange getIndex() {
+        return indexRange;
     }
 
     // ------------------------------------------------------------------------
@@ -48,19 +48,19 @@ public abstract class TimeFragmentDataAccessor<T> {
     
 
     public int getStartIndex() {
-        return index.getStartIndex();
+        return indexRange.getStartIndex();
     }
 
     public int getEndIndex() {
-        return index.getEndIndex();
+        return indexRange.getEndIndex();
     }
 
     public double getTimeByIndex(int i) {
-        return index.getTimeByIndex(i);
+        return indexRange.getTimeByIndex(i);
     }
 
     public double getHomogeneousTimeByIndex(int i) {
-        return index.getHomogeneousTimeByIndex(i);
+        return indexRange.getHomogeneousTimeByIndex(i);
     }
 
 }

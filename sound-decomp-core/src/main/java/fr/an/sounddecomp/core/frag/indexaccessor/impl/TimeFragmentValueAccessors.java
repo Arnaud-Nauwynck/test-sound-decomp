@@ -1,17 +1,17 @@
 package fr.an.sounddecomp.core.frag.indexaccessor.impl;
 
-import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragmentDataAccessor;
-import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragmentIndex;
+import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragIndexedAccessor;
+import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragIndexRange;
 
 public class TimeFragmentValueAccessors {
 
     // ------------------------------------------------------------------------
     
-    public static class SimpleArrayTimeFragmentValueAccessor<T> extends TimeFragmentDataAccessor<T> {
+    public static class SimpleArrayTimeFragmentValueAccessor<T> extends TimeFragIndexedAccessor<T> {
 
         private T[] data;
         
-        public SimpleArrayTimeFragmentValueAccessor(TimeFragmentIndex index, T[] data) {
+        public SimpleArrayTimeFragmentValueAccessor(TimeFragIndexRange index, T[] data) {
             super(index);
             this.data = data;
         }
@@ -31,12 +31,12 @@ public class TimeFragmentValueAccessors {
 
     // ------------------------------------------------------------------------
     
-    public static class OffsetArrayTimeFragmentValueAccessor<T> extends TimeFragmentDataAccessor<T> {
+    public static class OffsetArrayTimeFragmentValueAccessor<T> extends TimeFragIndexedAccessor<T> {
 
         private T[] data;
         private int offsetData;
         
-        public OffsetArrayTimeFragmentValueAccessor(TimeFragmentIndex index, T[] data, int offsetData) {
+        public OffsetArrayTimeFragmentValueAccessor(TimeFragIndexRange index, T[] data, int offsetData) {
             super(index);
             this.data = data;
             this.offsetData = offsetData;
@@ -57,13 +57,13 @@ public class TimeFragmentValueAccessors {
 
     // ------------------------------------------------------------------------
     
-    public static class MixedArrayOffsetTimeFragmentValueAccessor<T> extends TimeFragmentDataAccessor<T> {
+    public static class MixedArrayOffsetTimeFragmentValueAccessor<T> extends TimeFragIndexedAccessor<T> {
 
         private T[] data;
         private int offsetData;
         private int rowDataSize;
         
-        public MixedArrayOffsetTimeFragmentValueAccessor(TimeFragmentIndex index, T[] data, int offsetData, int rowDataSize) {
+        public MixedArrayOffsetTimeFragmentValueAccessor(TimeFragIndexRange index, T[] data, int offsetData, int rowDataSize) {
             super(index);
             this.data = data;
             this.offsetData = offsetData;
@@ -86,11 +86,11 @@ public class TimeFragmentValueAccessors {
     
     // ------------------------------------------------------------------------
     
-    public static class ConstTimeFragmentDataAccessor<T> extends TimeFragmentDataAccessor<T> {
+    public static class ConstTimeFragmentDataAccessor<T> extends TimeFragIndexedAccessor<T> {
 
         private T data;
          
-        public ConstTimeFragmentDataAccessor(TimeFragmentIndex index, T data) {
+        public ConstTimeFragmentDataAccessor(TimeFragIndexRange index, T data) {
             super(index);
             this.data = data;
         }

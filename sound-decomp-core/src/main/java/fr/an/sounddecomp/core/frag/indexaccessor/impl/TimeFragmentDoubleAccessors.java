@@ -1,18 +1,18 @@
 package fr.an.sounddecomp.core.frag.indexaccessor.impl;
 
-import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragmentDoubleAccessor;
-import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragmentIndex;
+import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragDoubleIndexedAccessor;
+import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragIndexRange;
 
 
 public class TimeFragmentDoubleAccessors {
 
     // ------------------------------------------------------------------------
     
-    public static class SimpleArrayTimeFragmentDoubleAccessor extends TimeFragmentDoubleAccessor {
+    public static class SimpleArrayTimeFragmentDoubleAccessor extends TimeFragDoubleIndexedAccessor {
 
         private double[] data;
         
-        public SimpleArrayTimeFragmentDoubleAccessor(TimeFragmentIndex index, double[] data) {
+        public SimpleArrayTimeFragmentDoubleAccessor(TimeFragIndexRange index, double[] data) {
             super(index);
             this.data = data;
         }
@@ -32,12 +32,12 @@ public class TimeFragmentDoubleAccessors {
 
     // ------------------------------------------------------------------------
     
-    public static class OffsetArrayTimeFragmentDoubleAccessor extends TimeFragmentDoubleAccessor {
+    public static class OffsetArrayTimeFragmentDoubleAccessor extends TimeFragDoubleIndexedAccessor {
 
         private double[] data;
         private int offsetData;
         
-        public OffsetArrayTimeFragmentDoubleAccessor(TimeFragmentIndex index, double[] data, int offsetData) {
+        public OffsetArrayTimeFragmentDoubleAccessor(TimeFragIndexRange index, double[] data, int offsetData) {
             super(index);
             this.data = data;
             this.offsetData = offsetData;
@@ -58,13 +58,13 @@ public class TimeFragmentDoubleAccessors {
 
     // ------------------------------------------------------------------------
     
-    public static class MixedArrayOffsetTimeFragmentDoubleAccessor<T> extends TimeFragmentDoubleAccessor {
+    public static class MixedArrayOffsetTimeFragmentDoubleAccessor<T> extends TimeFragDoubleIndexedAccessor {
 
         private double[] data;
         private int offsetData;
         private int rowDataSize;
         
-        public MixedArrayOffsetTimeFragmentDoubleAccessor(TimeFragmentIndex index, double[] data, int offsetData, int rowDataSize) {
+        public MixedArrayOffsetTimeFragmentDoubleAccessor(TimeFragIndexRange index, double[] data, int offsetData, int rowDataSize) {
             super(index);
             this.data = data;
             this.offsetData = offsetData;
@@ -87,11 +87,11 @@ public class TimeFragmentDoubleAccessors {
     
     // ------------------------------------------------------------------------
     
-    public static class ConstTimeFragmentDataAccessor<T> extends TimeFragmentDoubleAccessor {
+    public static class ConstTimeFragmentDataAccessor<T> extends TimeFragDoubleIndexedAccessor {
 
         private double data;
          
-        public ConstTimeFragmentDataAccessor(TimeFragmentIndex index, double data) {
+        public ConstTimeFragmentDataAccessor(TimeFragIndexRange index, double data) {
             super(index);
             this.data = data;
         }

@@ -3,11 +3,11 @@ package fr.an.sounddecomp.core.frag.indexaccessor;
 /**
  * typed sub-class for TimeFragmentDataAccessor<Double>
  */
-public abstract class TimeFragmentDoubleAccessor extends TimeFragmentDataAccessor<Double> {
+public abstract class TimeFragDoubleIndexedAccessor extends TimeFragIndexedAccessor<Double> {
     
     // ------------------------------------------------------------------------
     
-    public TimeFragmentDoubleAccessor(TimeFragmentIndex index) {
+    public TimeFragDoubleIndexedAccessor(TimeFragIndexRange index) {
         super(index);
     }
 

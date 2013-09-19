@@ -1,7 +1,7 @@
 package fr.an.sounddecomp.core.frag.inds.ampl;
 
-import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragmentDataAccessor;
-import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragmentDoubleAccessor;
+import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragIndexedAccessor;
+import fr.an.sounddecomp.core.frag.indexaccessor.TimeFragDoubleIndexedAccessor;
 
 /**
  * Affine Continuous Amplitude Function
@@ -26,11 +26,11 @@ public class AffineC0AmplitudeUpDownTimeFragmentFunctor implements Runnable {
     }
 
     
-    private TimeFragmentDataAccessor<AffineC0AmplitudeUpDownFragData> outputResult;
+    private TimeFragIndexedAccessor<AffineC0AmplitudeUpDownFragData> outputResult;
     
-    private TimeFragmentDataAccessor<AffineC0AmplitudeUpDownFragData> inputPrevAmplC0Result;
+    private TimeFragIndexedAccessor<AffineC0AmplitudeUpDownFragData> inputPrevAmplC0Result;
     
-    private TimeFragmentDoubleAccessor inputData;
+    private TimeFragDoubleIndexedAccessor inputData;
     
     // ------------------------------------------------------------------------
 
@@ -93,29 +93,29 @@ public class AffineC0AmplitudeUpDownTimeFragmentFunctor implements Runnable {
 
     // ------------------------------------------------------------------------
     
-    public TimeFragmentDataAccessor<AffineC0AmplitudeUpDownFragData> getOutputResult() {
+    public TimeFragIndexedAccessor<AffineC0AmplitudeUpDownFragData> getOutputResult() {
         return outputResult;
     }
 
     public void setOutputResult(
-            TimeFragmentDataAccessor<AffineC0AmplitudeUpDownFragData> outputResult) {
+            TimeFragIndexedAccessor<AffineC0AmplitudeUpDownFragData> outputResult) {
         this.outputResult = outputResult;
     }
 
-    public TimeFragmentDataAccessor<AffineC0AmplitudeUpDownFragData> getInputPrevAmplC0Result() {
+    public TimeFragIndexedAccessor<AffineC0AmplitudeUpDownFragData> getInputPrevAmplC0Result() {
         return inputPrevAmplC0Result;
     }
 
     public void setInputPrevAmplC0Result(
-            TimeFragmentDataAccessor<AffineC0AmplitudeUpDownFragData> inputPrevAmplC0Result) {
+            TimeFragIndexedAccessor<AffineC0AmplitudeUpDownFragData> inputPrevAmplC0Result) {
         this.inputPrevAmplC0Result = inputPrevAmplC0Result;
     }
 
-    public TimeFragmentDoubleAccessor getInputData() {
+    public TimeFragDoubleIndexedAccessor getInputData() {
         return inputData;
     }
 
-    public void setInputData(TimeFragmentDoubleAccessor inputData) {
+    public void setInputData(TimeFragDoubleIndexedAccessor inputData) {
         this.inputData = inputData;
     }
     

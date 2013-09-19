@@ -1,4 +1,4 @@
-package fr.an.sounddecomp.core.frag.def.functordef.impl;
+package fr.an.sounddecomp.core.frag.def.func.impl;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -8,38 +8,21 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 import org.apache.commons.collections.Factory;
 
 import fr.an.sounddecomp.core.frag.def.TimeFragmentDefRegisty;
-import fr.an.sounddecomp.core.frag.def.functordef.TimeFragFunctor;
-import fr.an.sounddecomp.core.frag.def.functordef.TimeFragFunctorDef;
+import fr.an.sounddecomp.core.frag.def.func.TimeFragFuncDef;
+import fr.an.sounddecomp.core.frag.def.func.TimeFragFuncEvaluator;
 
 /**
- * TimeFragFunctorDef sub-class for instanciating simple user-defined functor (wrapped in UserDefinedTimeFragFunctor)
+ * TimeFragFunctorDef sub-class for instanciating simple user-defined class functor (wrapped in UserDefinedTimeFragFunctor)
  *
  * @param <T>
  */
-public class UserDefinedTimeFragFunctorDef<T extends Runnable> extends TimeFragFunctorDef {
+public class UserDefinedTimeFragFunctorDef<T extends Runnable> extends TimeFragFuncDef {
 
-    public static class Builder<T> extends TimeFragFunctorDef.Builder {
-        Class<T> objectType;
-        Factory/*<T>*/ factory;
-        
-        @Override /** override to check sub-class parameter */
-        public void addInputParamDef(TimeFragFunctorParamDef.Builder p) {
-            if (!(p instanceof UserDefinedTimeFragFunctorParamDef.Builder)) throw new IllegalArgumentException();
-            super.addInputParamDef(p);
-        }
-        @Override /** override to check sub-class parameter */
-        public void addOutputParamDef(TimeFragFunctorParamDef.Builder p) {
-            if (!(p instanceof UserDefinedTimeFragFunctorParamDef.Builder)) throw new IllegalArgumentException();
-            super.addOutputParamDef(p);
-        }
-    }
-    
-    // ------------------------------------------------------------------------
-    
     /**
      * the underlying user-defined object class to wrap
      */
@@ -59,27 +42,91 @@ public class UserDefinedTimeFragFunctorDef<T extends Runnable> extends TimeFragF
         if (objectType == null) throw new IllegalArgumentException(); 
         if (factory == null) throw new IllegalArgumentException(); 
     }
-
+    
     @Override
-    public TimeFragFunctor createInstance() {
+    public TimeFragFuncEvaluator getFuncEvaluator() {
+        return innerFuncEvaluator;
+    }
+
+    private TimeFragFuncEvaluator innerFuncEvaluator = new TimeFragFuncEvaluator() { 
+        public void evalFunc(TimeFragFuncDef def,
+                Object[] inputValues,
+                Object[] outputValues
+                ) {
+            UserDefinedTimeFragFunctorDef.this.evalFunc(inputValues, outputValues);
+        }
+    };
+        
+    @Override
+    public void evalFunc(Object[] inputValues, Object[] outputValues) {
         @SuppressWarnings("unchecked")
-        T wrappedObject = (T) factory.create();
-        return new UserDefinedTimeFragFunctor<T>(this, wrappedObject);
+        T functorObject = (T) factory.create();
+        
+        setWrappedObjectInputValues(functorObject, inputValues);
+
+        // do call functor
+        functorObject.run();
+        
+        getWrappedObjectOutputValues(functorObject, outputValues);
+    }
+    
+    protected void setWrappedObjectInputValues(T functorObject, Object[] inputValues) {
+        final List<TimeFragFuncParamDef> paramDefs = getInputParamDefs();
+        final int len = paramDefs.size();
+        for (int index = 0; index < len; index++) {
+            UserDefinedTimeFragFunctorParamDef propParamDef = (UserDefinedTimeFragFunctorParamDef) paramDefs.get(index);
+            Object paramValue = inputValues[index];
+            propParamDef.setFieldValue(functorObject, paramValue);
+            index++;
+        }
+    }
+
+    protected void getWrappedObjectOutputValues(T functorObject, Object[] outputValues) {
+        final List<TimeFragFuncParamDef> paramDefs = getOutputParamDefs();
+        final int len = paramDefs.size();
+        for (int index = 0; index < len; index++) {
+            UserDefinedTimeFragFunctorParamDef propParamDef = (UserDefinedTimeFragFunctorParamDef) paramDefs.get(index);
+            Object paramValue = propParamDef.getFieldValue(functorObject);
+            outputValues[index] = paramValue;
+            index++;
+        }
+    }
+
+    
+    // ------------------------------------------------------------------------
+
+    /**
+     * design pattern Builder on TimeFragFuncDef (temporary writable data for constructing TimeFragFuncDef)
+     */
+    public static class Builder<T> extends TimeFragFuncDef.Builder {
+        Class<T> objectType;
+        Factory/*<T>*/ factory;
+        
+        @Override /** override to check sub-class parameter */
+        public void addInputParamDef(TimeFragFuncParamDef.Builder p) {
+            if (!(p instanceof UserDefinedTimeFragFunctorParamDef.Builder)) throw new IllegalArgumentException();
+            super.addInputParamDef(p);
+        }
+        @Override /** override to check sub-class parameter */
+        public void addOutputParamDef(TimeFragFuncParamDef.Builder p) {
+            if (!(p instanceof UserDefinedTimeFragFunctorParamDef.Builder)) throw new IllegalArgumentException();
+            super.addOutputParamDef(p);
+        }
     }
     
     
-    
     // ------------------------------------------------------------------------
-    
+
+
     /**
      * child ParamDef sub-class for UserDefinedTimeFragFunctor
      * it extends TimeFragFunctorParamDef only for performance reason: to cache introspection method/fields!! 
      */
-    public static class UserDefinedTimeFragFunctorParamDef extends TimeFragFunctorParamDef {
+    public static class UserDefinedTimeFragFunctorParamDef extends TimeFragFuncParamDef {
         
-        public static class Builder extends TimeFragFunctorParamDef.Builder {
+        public static class Builder extends TimeFragFuncParamDef.Builder {
             @Override
-            public UserDefinedTimeFragFunctorParamDef build(TimeFragFunctorDef owner) {
+            public UserDefinedTimeFragFunctorParamDef build(TimeFragFuncDef owner) {
                 return new UserDefinedTimeFragFunctorParamDef((UserDefinedTimeFragFunctorDef<?>) owner, this);
             }
         }

@@ -1,14 +1,14 @@
-package fr.an.sounddecomp.core.frag.def.functordef.impl;
+package fr.an.sounddecomp.core.frag.def.func.impl;
 
 
-public class TimeFragFunctorDefs {
+public class TimeFragFuncDefs {
 
     /* private to force all static */
-    private TimeFragFunctorDefs() {}
+    private TimeFragFuncDefs() {}
 
     // ------------------------------------------------------------------------
 
-    public static class ConstValueTimeFragFunctorDef {
+    public static class ConstValueTimeFragFuncDef {
         // TODO
     }
 
@@ -18,7 +18,7 @@ public class TimeFragFunctorDefs {
     
     // ------------------------------------------------------------------------
     
-    // TODO ... MethodInvokeWrapperTimeFragFunctor
+    // TODO ... MethodInvokeWrapperTimeFragFunc
     
     // ------------------------------------------------------------------------
 
@@ -26,69 +26,69 @@ public class TimeFragFunctorDefs {
     
     // ------------------------------------------------------------------------
     
-    public static class SSAGraphCompoundTimeFragFunctorDef {
+    public static class SSAGraphCompoundTimeFragFuncDef {
         // TODO
     }
     
 //    // ------------------------------------------------------------------------
 //    
-//    public static class SimpleCompoundTimeFragFunctorDef {
+//    public static class SimpleCompoundTimeFragFuncDef {
 //        // TODO
 //    }
 
 
     // ------------------------------------------------------------------------
 
-    public static class ObjectPropExtractTimeFragFunctorDef {
+    public static class ObjectPropExtractTimeFragFuncDef {
         // TODO
     }
 
     // ------------------------------------------------------------------------
 
-    public static class ObjectCreatorCombineTimeFragFunctorDef {
+    public static class ObjectCreatorCombineTimeFragFuncDef {
         // TODO
     }
 
     // ------------------------------------------------------------------------
 
-    public static class TimeValueExtractTimeFragFunctorDef {
+    public static class TimeValueExtractTimeFragFuncDef {
         // TODO
     }
 
     
 //    // ------------------------------------------------------------------------
 //
-//    public static class TupleProjectionExtractTimeFragFunctorDef {
+//    public static class TupleProjectionExtractTimeFragFuncDef {
 //        // TODO
 //    }
 //
 //    // ------------------------------------------------------------------------
 //
-//    public static class TupleCombineTimeFragFunctorDef {
+//    public static class TupleCombineTimeFragFuncDef {
 //        // TODO
 //    }
     
     // ------------------------------------------------------------------------
     
-    public static class InvokeAsyncTimeFragFunctorDef {
+    public static class InvokeAsyncTimeFragFuncDef {
         // TODO
     }
 
     // ------------------------------------------------------------------------
 
-    public static class WaitAsyncTimeFragFunctorDef {
+    public static class WaitAsyncTimeFragFuncDef {
         // TODO
     }
 
     // ------------------------------------------------------------------------
 
-    public static class ThreadPoolExecutorMultiTimeFragFunctorDef {
+    public static class ThreadPoolExecutorMultiTimeFragFuncDef {
         // TODO
     }
 
     // ------------------------------------------------------------------------
 
-    public static class OpenCLKernelMultiTimeFragFunctorDef {
+    public static class OpenCLKernelMultiTimeFragFuncDef {
         // TODO
     }
 
